@@ -1,9 +1,12 @@
 #' Read shell script into a characater array
 #'
 #' @export
-#' @param filename, character, the name of the script file
+#' @param name character, the name of the script file
+#' @param path character, the path to the script
 #' @return named character vector with 'app' and 'param'
-read_script <- function(filename = system.file("scripts/global-analysis-forecast-phy-001-024.sh", package = "copernicus")){
+read_script <- function(name = "global-analysis-forecast-phy-001-024",
+                        path = system.file("scripts", package = "copernicus")){
+  filename <- file.path(path[1], name[1])
   x <- readLines(filename)
   ix <- regexpr("\\s", x)
   c("app" = substring(x, 1, ix-1),
@@ -91,6 +94,6 @@ populate_script <- function(template = read_script(),
 #' \item{param the parameter (argument) vector fully populated}
 #' }
 #' @return integer with 0 for success
-fetch_copernicus <- function(x = populate_script()){
+download_copernicus <- function(x = populate_script()){
   system2(x[['app']], x[['param']])
 }

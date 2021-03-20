@@ -5,12 +5,14 @@
 \title{Read shell script into a characater array}
 \usage{
 read_script(
-  filename = system.file("scripts/global-analysis-forecast-phy-001-024.sh", package =
-    "copernicus")
+  name = "global-analysis-forecast-phy-001-024",
+  path = system.file("scripts", package = "copernicus")
 )
 }
 \arguments{
-\item{filename, }{character, the name of the script file}
+\item{name}{character, the name of the script file}
+
+\item{path}{character, the path to the script}
 }
 \value{
 named character vector with 'app' and 'param'

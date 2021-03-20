@@ -1,0 +1,19 @@
+Package: copernicus
+Type: Package
+Title: Serves Center for Ocean Forecasting Copernicus needs
+Version: 0.1.0
+Author: Ben Tupper
+Maintainer: Ben Tupper <btupper@bigelow.org>
+Description: Provides downlaod, archiving and access to Copernicus related local datasets.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports:
+  rlang,
+  dplyr,
+  ncdf4,
+  sf,
+  stars,
+  readr,
+  twinkle
+RoxygenNote: 7.1.1

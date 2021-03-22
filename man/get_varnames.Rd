@@ -4,6 +4,7 @@
 \alias{get_varnames}
 \alias{get_dimnames}
 \alias{get_dims}
+\alias{list_dims}
 \title{Retrieve information about a grads resource}
 \usage{
 get_varnames(x, longnames = FALSE)
@@ -11,6 +12,8 @@ get_varnames(x, longnames = FALSE)
 get_dimnames(x, longnames = FALSE)
 
 get_dims(x)
+
+list_dims(x)
 }
 \arguments{
 \item{x}{ncdf4 object}
@@ -21,6 +24,8 @@ get_dims(x)
 character vector
 
 named numeric vector of dimension lengths
+
+named list of character vectors of dimension names per variable
 }
 \description{
 Retrieve information about a grads resource
@@ -30,5 +35,7 @@ Retrieve information about a grads resource
 \item \code{get_dimnames}: Retrieve the names of available dimensions
 
 \item \code{get_dims}: Retrieve the dimensions
+
+\item \code{list_dims}: Retrieve the dimensions
 }}
 

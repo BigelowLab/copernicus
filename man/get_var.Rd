@@ -10,6 +10,7 @@ get_var(
   bb = get_bounds(x),
   time = get_range(x, "time"),
   depth = get_range(x, "depth"),
+  banded = TRUE,
   form = c("array", "stars")[2]
 )
 }
@@ -30,7 +31,10 @@ closest known depths in the object. See \code{get_depth} Default
 is the first depth in the object.  Ignored if \code{depth} is not
 a dimension of the variable.}
 
-\item{form}{character either 'array' of 'stars' (default)
+\item{banded}{logical, if TRUE then retrieve mutliple bands (time/depth). If
+FALSE then allow only one value for time and depth and degenrate dimensions}
+
+\item{form}{character, either 'array' of 'stars' (default)
 \itemize{
   \item{array}{an array or list of arrays, possibly degenerate to a matrix}
   \item{stars}{a stars object, possibly with band (time) and z (depth)}

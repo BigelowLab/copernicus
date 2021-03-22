@@ -92,6 +92,21 @@ get_dims <- function(x){
          })
 }
 
+#' @export
+#' @describeIn get_varnames Retrieve the dimensions
+#' @return named list of character vectors of dimension names per variable
+list_dims <- function(x){
+  stopifnot(inherits(x, "ncdf4"))
+  dids <- sapply(x$dim,
+              function(x) x$id)
+  dnames <- names(dids)
+  vnames <- names(x$var)
+  sapply(vnames,
+         function(vname){
+           dnames[x$var[[vname]]$dimids+1]
+         })
+}
+
 #' Retrieve geospatial information about a grads resource
 #'
 #' @export
@@ -245,7 +260,9 @@ get_var_array <- function(x, var, index, collapse_degen = FALSE){
 #'        closest known depths in the object. See \code{get_depth} Default
 #'        is the first depth in the object.  Ignored if \code{depth} is not
 #'        a dimension of the variable.
-#' @param form character either 'array' of 'stars' (default)
+#' @param banded logical, if TRUE then retrieve mutliple bands (time/depth). If
+#'        FALSE then allow only one value for time and depth and degenrate dimensions
+#' @param form character, either 'array' of 'stars' (default)
 #' \itemize{
 #'   \item{array}{an array or list of arrays, possibly degenerate to a matrix}
 #'   \item{stars}{a stars object, possibly with band (time) and z (depth)}
@@ -255,21 +272,23 @@ get_var <- function(x,
                     bb = get_bounds(x),
                     time = get_range(x, 'time'),
                     depth = get_range(x, "depth"),
+                    banded = TRUE,
                     form = c("array", "stars")[2]){
 
-
   if(FALSE){
-    var = get_varnames(x)
+    var = "thetao" # get_varnames(x)
     bb = get_bounds(x)
     time = get_range(x, 'time')
     depth = get_range(x, "depth")
+    banded = FALSE
     form = c("array", "stars")[2]
   }
 
   if (length(var) > 1){
     r <- sapply(var,
                 function(v){
-                  get_var(x, v, bb = bb, time = time, depth = depth, form = form)
+                  get_var(x, v, bb = bb, time = time, depth = depth,
+                          banded = banded, form = form)
                 }, simplify = FALSE)
     if (tolower(form[1]) == 'stars'){
       r <- Reduce(c, r) %>%
@@ -279,6 +298,11 @@ get_var <- function(x,
   }
 
   stopifnot(var[1] %in% get_varnames(x))
+
+  if (!banded) {
+    depth <- depth[c(1,1)]
+    time <- time[c(1,1)]
+  }
 
   ilon <- loc_index(x, bb[1:2], "lon")
   ilat <- loc_index(x, bb[3:4], "lat")
@@ -301,7 +325,7 @@ get_var <- function(x,
     time =  loc_index(x, time, "time", make_rle = TRUE),
     depth = loc_index(x, depth, "depth", make_rle = TRUE))
 
-  m <- get_var_array(x, var[1], index)
+  m <- get_var_array(x, var[1], index, collapse_degen = !banded)
 
   if (tolower(form[1]) %in% c('array', "matrix")) return(m)
 
@@ -311,10 +335,18 @@ get_var <- function(x,
                         ymax = ylim[2]),
                       crs = 4326)
   d <- dim(m)
+  #cat("var=", var[1], "\n")
+  #print(d)
   time_index <- index$time[1] + (seq_len(index$time[2]) - 1)
   depth_index <- index$depth[1] + (seq_len(index$depth[2]) - 1)
 
-  if (length(d) == 4){
+  if (!banded){
+    r <- stars::st_as_stars(stbb,
+                            nx = d[1],
+                            ny = d[2],
+                            values = m) %>%
+         stars::st_flip(which = 2)
+  } else if (length(d) == 4){
     # lon, lat, depth, time
     r <- lapply(seq_len(d[4]),
                 function(i){
@@ -324,13 +356,20 @@ get_var <- function(x,
                                      nz = d[3],
                                      values = m[,,,i]) %>%
                     stars::st_flip(which = 2) %>%
-                    stars::st_set_dimensions(which = 'z',
+                    stars::st_set_dimensions(which = 3,
+                                             names = 'depth',
                                              values = depths[depth_index])
-                }) %>%
-      twinkle::bind_stars(nms= format(times[itime], "%Y%m%dT%H%M%S")) %>%
-      merge(name = 'time')  %>%
-      stars::st_set_dimensions(which = 'time',
-                               values = times[time_index])
+                })
+    if (length(r) > 1){
+      r <- r %>%
+        twinkle::bind_stars(nms= format(times[itime], "%Y%m%dT%H%M%S")) %>%
+        merge(name = 'time') %>%
+        stars::st_set_dimensions(which = 4,
+                                 names = 'time',
+                                 values = times[time_index])
+    } else {
+      r <- r[[1]]
+    }
 
   } else if (length(d) == 3) {
     # lon, lat, time
@@ -355,6 +394,5 @@ get_var <- function(x,
                                values = times[time_index],
                                names = 'time')
   }
-  r <- stats::setNames(r, var)
-  r
+  stats::setNames(r, var)
 }

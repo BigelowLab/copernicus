@@ -1,0 +1,22 @@
+# copernicus
+
+Provides download, archiving and access to [Copernicus](https://marine.copernicus.eu/) marine local datasets.
+
+### Requirements
+
+  + [R v4+](https://www.r-project.org/)
+  + [rlang](https://CRAN.R-project.org/package=rlang)
+  + [dplyr](https://CRAN.R-project.org/package=dplyr)
+  + [ncdf4](https://CRAN.R-project.org/package=ncdf4)
+  + [sf](https://CRAN.R-project.org/package=sf)
+  + [stars](https://CRAN.R-project.org/package=stars)
+  + [readr](https://CRAN.R-project.org/package=readr)
+  + [twinkle](https://github.com/BigelowLab/twinkle)
+  
+
+### Installation
+
+```
+remotes::install_github("BigelowLab/copernicus")
+```
+

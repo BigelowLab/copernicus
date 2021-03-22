@@ -1,3 +1,22 @@
+#' Unpack a copernicus ncdf4 file
+#'
+#' @export
+#' @param filename character, the full path specification
+#' @param banded logical, see \code{\link{get_var}}.  Setting to FALSE
+#'        returns single band objects (depth and time dropped)
+#' @return list of \code{stars} objects
+unpack_copernicus <- function(filename, banded = FALSE){
+  x <- ncdf4::nc_open(filename[1])
+  ss <- sapply(get_varnames(x),
+               function(vname){
+                 get_var(x, var = vname, banded = banded)
+               },
+               simplify = FALSE)
+  ncdf4::nc_close(x)
+  ss
+}
+
+
 #' Fetch Copernicus data as a list of \code{stars} objects
 #'
 #' This is a wrapper around \code{\link{download_copernicus}} that
@@ -30,14 +49,7 @@ fetch_copernicus <- function(script = "global-analysis-forecast-phy-001-024",
     warning("unable to download copernicus data to", out_path[1])
     return(NULL)
   }
-
-  x <- ncdf4::nc_open(out_path[1])
-  ss <- sapply(get_varnames(x),
-               function(vname){
-                 get_var(x, var = vname)
-               },
-               simplify = FALSE)
-  ncdf4::nc_close(x)
+  ss <- unpack_copernicus(out_path[1])
   if (cleanup){
     ok <- file.remove(out_path)
     if (ok != 0) warning("unable to remove file:", out_path[1])

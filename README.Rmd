@@ -33,25 +33,74 @@ remotes::install_github("BigelowLab/copernicus")
 
 ## Downloading
 
-### Fetch one day of global-analysis-forecast-phy-001-024
+You don't need to download data unless you need to download areas outside of `nwa` `[-77.0, -42.5,  36.5,  56.7]` See the [wiki](https://github.com/BigelowLab/copernicus/wiki/Downloading) for hints.
 
-Requesting one day (by date) will return a list of `stars` objects. We can use the `bind_stars` from the [twinkle package](https://github.com/BigelowLab/twinkle) to bind them all into one object.
+## Local dataset
 
-```{r fetch, message = FALSE}
-x <- fetch_copernicus(date = Sys.Date(), banded = FALSE) %>%
-  twinkle::bind_stars()
+We maintain a local dataset for the Northwest Atlantic (`nwa` `[-77.0, -42.5,  36.5,  56.7]`).  In particular we have the [GLOBAL_ANALYSIS_FORECAST_PHY_001_024](https://resources.marine.copernicus.eu/?option=com_csw&view=details&product_id=GLOBAL_ANALYSIS_FORECAST_PHY_001_024) for 10 surface water variables and bottom temp going back to January 1, 2019.
+
+### Path
+
+```{r path, message = FALSE}
+library(dplyr)
+library(stars)
+library(copernicus)
+dataset <- "global-analysis-forecast-phy-001-024"
+path <- copernicus::copernicus_path(dataset, "nwa")
 ```
 
-```{r x}
-x
+### Database
+
+The database is very light, just date variable and depth. Depth recorded this way will allow for intermediate depths and depths ranges ('50' or '50-100').
+
+```{r database, message = FALSE}
+db <- copernicus::read_database(path)
+db
 ```
 
-### Fetch one day and add to the database
+### Look Up Table (lut)
 
-The [fetch_day](https://github.com/BigelowLab/copernicus/blob/a8c82e6c5a90a5e2893023b34a032e14486507a6/inst/scripts/fetch_day.R) script is the best way to downlaod a given day and add it to the database.
+The variable names are a bit cryptic (at least to me) so we provide a look-up table that associates the variable name with other information available from the source.
 
+```{r lut, message = FALSE}
+lut <- copernicus::read_lut(name = dataset)
+print(lut, n = nrow(lut))
 ```
-Rscript /mnt/ecocast/corecode/R/copernicus/inst/scripts/fetch_day.R 2020-01-01
+
+### Filenames
+
+Filenames can be made with the database and the path.
+
+```{r filenames, message = FALSE}
+
+small_db <- db %>%
+  dplyr::filter(var == 'so' & between(date, as.Date("2019-07-01"), as.Date("2019-07-06")))
+filenames <- copernicus::compose_filename(small_db, path)
+filenames
 ```
 
+### Read timeseries of one variable
 
+The [stars](https://r-spatial.github.io/stars/) package provides nice input utilities.  We have selected above just one variable for 6 days. So, it would be nice to have just one attribute with 6 bands.
+
+```{r read_one_var, message = FALSE}
+x <- stars::read_stars(filenames, along = 'time') %>%
+  stars::st_set_dimensions(which = 'time', value = small_db$date)
+plot(x)
+```
+
+### Read a day of multiple variables
+
+Let select another subset of multiple variables for just one day (we could do multiple variables for multiple days, but, really, this is just a demo.) In this case we want multiple attributes (variables). [stars](https://r-spatial.github.io/stars/) will do that right out of the box.
+
+```{r read_multi_variable, message = FALSE}
+ice_db <- db %>% 
+  dplyr::filter(var %in% c('usi', 'vsi', 'siconc', 'sithick') & 
+                date == as.Date("2019-12-18"))
+y <- ice_db %>%
+  copernicus::compose_filename(path) %>%
+  stars::read_stars() %>%
+  setNames(ice_db$var)
+plot(y['siconc'], main = 'siconc', axes = TRUE)
+plot(y['sithick'], main = 'sithick', axes = TRUE)
+```

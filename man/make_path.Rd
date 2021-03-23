@@ -11,7 +11,7 @@ make_path(path, recursive = TRUE, ...)
 
 \item{recursive}{logical, create paths recursively?}
 
-\item{...}{other arguments for \code{\link[base]{dir.create}}}
+\item{...}{other arguments for \code{dir.create}}
 }
 \value{
 logical, TRUE if the path exists or is created

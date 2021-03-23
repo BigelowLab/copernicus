@@ -1,3 +1,14 @@
+---
+title: "copernicus"
+output: github_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(stars)
+library(copernicus)
+```
+
 # copernicus
 
 Provides download, archiving and access to [Copernicus](https://marine.copernicus.eu/) marine local datasets.
@@ -19,4 +30,28 @@ Provides download, archiving and access to [Copernicus](https://marine.copernicu
 ```
 remotes::install_github("BigelowLab/copernicus")
 ```
+
+## Downloading
+
+### Fetch one day of global-analysis-forecast-phy-001-024
+
+Requesting one day (by date) will return a list of `stars` objects. We can use the `bind_stars` from the [twinkle package](https://github.com/BigelowLab/twinkle) to bind them all into one object.
+
+```{r fetch, message = FALSE}
+x <- fetch_copernicus(date = Sys.Date(), banded = FALSE) %>%
+  twinkle::bind_stars()
+```
+
+```{r x}
+x
+```
+
+### Fetch one day and add to the database
+
+The [fetch_day](https://github.com/BigelowLab/copernicus/blob/a8c82e6c5a90a5e2893023b34a032e14486507a6/inst/scripts/fetch_day.R) script is the best way to downlaod a given day and add it to the database.
+
+```
+Rscript /mnt/ecocast/corecode/R/copernicus/inst/scripts/fetch_day.R 2020-01-01
+```
+
 

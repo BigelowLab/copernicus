@@ -15,7 +15,8 @@ populate_script(
   out_dir = copernicus_path("tmp"),
   out_name = sprintf("copernicus_\%s.nc", format(Sys.Date(), "\%Y-\%m-\%d")),
   username = NULL,
-  password = NULL
+  password = NULL,
+  ...
 )
 }
 \arguments{
@@ -38,6 +39,8 @@ populate_script(
 \item{username}{character or NULL, (if NULL get from options)}
 
 \item{password}{character or NULL, (if NULL get from options)}
+
+\item{...}{ignored}
 }
 \value{
 2 element character vector of 'app' and 'param'

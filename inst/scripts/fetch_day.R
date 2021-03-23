@@ -8,20 +8,22 @@
 
 library(copernicus)
 library(stars)
+library(dplyr)
 
 date <- commandArgs(trailingOnly = TRUE)[1]
-if (nchar(date) == 0) {
+if (is.na(date) || length(date) == 0) {
   date <- Sys.Date()
-} else {
-  date <- as.Date(date)
 }
 
-OPATH <- copernicus::copernicus_path("global-analysis-forecast-phy-001-024/nwa")
-DB <- copernicus::read_database()
+date <- as.Date(date)
 
-xx <- fetch_copernicus(date, banded = FALSE)
+OPATH <- copernicus::copernicus_path("global-analysis-forecast-phy-001-024/nwa")
+DB <- copernicus::read_database(OPATH)
+
+xx <- fetch_copernicus(date = date, banded = FALSE)
 depth <- rep("sur", length(xx))
-depth[grepl("bottom", names(xx), fixed = TRUE)] <- "bot"
+ix <- grepl("bottom", names(xx), fixed = TRUE)
+depth[ix] <- "bot"
 path <- file.path(OPATH,
                   format(date, "%Y"),
                   format(date, "%m%d"))
@@ -32,6 +34,9 @@ files <- file.path(path,
                     names(xx),
                     depth))
 for (i in seq_along(xx)) stars::write_stars(xx[[i]], files[i], driver = "GTiff")
+
+DB <- copernicus::append_database(DB, copernicus::decompose_filename(files)) %>%
+  copernicus::write_database(OPATH)
 
 
 

@@ -26,6 +26,7 @@ read_script <- function(name = "global-analysis-forecast-phy-001-024",
 #' @param out_name character, output filename
 #' @param username character or NULL, (if NULL get from options)
 #' @param password character or NULL, (if NULL get from options)
+#' @param ... ignored
 #' @return 2 element character vector of 'app' and 'param'
 populate_script <- function(template = read_script(),
                             bb = c(-77, -42.5, 36.5, 56.7),
@@ -39,7 +40,8 @@ populate_script <- function(template = read_script(),
                             out_name = sprintf("copernicus_%s.nc",
                                                format(Sys.Date(), "%Y-%m-%d")),
                             username = NULL,
-                            password = NULL){
+                            password = NULL,
+                            ...){
 
 # python -m motuclient --motu http://nrt.cmems-du.eu/motu-web/Motu --service-id GLOBAL_ANALYSIS_FORECAST_PHY_001_024-TDS --product-id global-analysis-forecast-phy-001-024 --longitude-min -77 --longitude-max -42.5 --latitude-min 36.5 --latitude-max 56.7 --date-min "2021-03-27 12:00:00" --date-max "2021-03-27 12:00:00" --depth-min 0.493 --depth-max 0.4942 --variable bottomT --variable mlotst --variable siconc --variable sithick --variable so --variable thetao --variable uo --variable usi --variable vo --variable vsi --variable zos --out-dir <OUTPUT_DIRECTORY> --out-name <OUTPUT_FILENAME> --user <USERNAME> --pwd <PASSWORD>
   if (FALSE){

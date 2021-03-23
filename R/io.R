@@ -52,7 +52,7 @@ fetch_copernicus <- function(script = "global-analysis-forecast-phy-001-024",
   ss <- unpack_copernicus(out_path[1])
   if (cleanup){
     ok <- file.remove(out_path)
-    if (ok != 0) warning("unable to remove file:", out_path[1])
+    if (!ok) warning("unable to remove file:", out_path[1])
   }
   ss
 }

@@ -35,7 +35,7 @@ logger::log_appender(logger::appender_tee(copernicus::copernicus_path("log")))
 log_formatter(formatter_sprintf)
 
 dataset <- file.path("global-analysis-forecast-phy-001-024", "nwa")
-OPATH <- copernicus::copernicus_path("global-analysis-forecast-phy-001-024/nwa")
+OPATH <- copernicus::copernicus_path(dataset)
 
 log_info("fetch_one: %s", dataset)
 ff <- lapply(seq_along(dates), function(i) fetch_one(dates[i]))

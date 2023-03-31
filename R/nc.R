@@ -15,6 +15,19 @@ get_dim <- function(x, what = c("time", "latitude", "longitude",
          "time" =  get_time(x))
 }
 
+
+#' Retrieve spatial resolution
+#'
+#' @export
+#' @param x ncdf4 object
+#' @return vector of numeric [xres, yres]
+get_res <- function(x){
+  lon = ncdf4::ncatt_get(x, "longitude")
+  lat = ncdf4::ncatt_get(x, "latitude")
+  c(lon$step, lat$step)
+}
+
+
 #' @export
 #' @describeIn get_loc retrieve numeric longitudes
 #' @return numeric longitude locations
@@ -118,7 +131,7 @@ list_dims <- function(x){
 #'   \item{\code{time} POSIXct vector}
 #'   \item{\code{all} list of \code{lon, lat, depth, time} vectors}
 #' }
-get_loc <- function(x, what = 'time'){
+get_loc <- function(x, what = 'time', ...){
   switch(tolower(what[1]),
          "lon" = get_lon(x),
          "lat" = get_lat(x),
@@ -168,16 +181,36 @@ get_bounds <- function(x){
 #' @param x ncdf4 object
 #' @param value vector of one of values (numeric for lon, lat, depth and POSIXct for time)
 #' @param what character, the name of the dimension
+#' @param pad logical, if TRUE then pad the indices by [-1, +1]
+#'   Ignored unless what is "lon" or "lat" in which case we assume that
+#'   value is provided as a two element vector of [min,max] (like for 
+#'   a bounding box).  If TRUE, then we add [-res/2, res/2] to [min, max]
+#'   ensuring that the user supplied locations are fully enclosed by the
+#'   returned location indices.
 #' @param make_rle logical, if TRUE use the first and last elements of value (which
 #'        may also be the first) to construct \code{[start, length]} encodings
 #' @return numeric vector if either indices closest to requested locations or
 #'        two element \code{[start, length]} vector if \code{rle = TRUE}
-loc_index <- function(x, value, what = 'lon', make_rle = FALSE){
-  loc <- as.numeric(get_loc(x, what))
+loc_index <- function(x, value, what = 'lon', 
+                      pad = FALSE, 
+                      make_rle = FALSE){
+  
+  loc <- as.numeric(get_loc(x, what[1]))
+  
+  if ((what[1] %in% c("lon", "lat")) && pad[1]){
+    res <- get_res(x)
+    if (what[1] == "lon"){
+      value = value + c(0-res[1]/2, res[1]/2)
+    } else {
+      value = value + c(0-res[2]/2, res[2]/2)
+    }
+  }
+  
   r <- sapply(as.numeric(value),
               function(v){
                 which.min(abs(loc - v))
               }, simplify = TRUE)
+  
   if (make_rle){
     len <- length(r)
     if (length(r) == 1){
@@ -362,7 +395,7 @@ get_var <- function(x,
                 })
     if (length(r) > 1){
       r <- r %>%
-        twinkle::bind_stars(nms= format(times[itime], "%Y%m%dT%H%M%S")) %>%
+        twinkle::bind_attrs(nms= format(times[itime], "%Y%m%dT%H%M%S")) %>%
         merge(name = 'time') %>%
         stars::st_set_dimensions(which = 4,
                                  names = 'time',
@@ -396,3 +429,24 @@ get_var <- function(x,
   }
   stats::setNames(r, var)
 }
+
+
+#' Open a copernicus connection given a product id
+#' 
+#' @export
+#' @param product_id char, the product identifer
+#' @param credentials NULL or character vector 
+#' @param base_uri char base UIR for opendap
+#' @return ncdf4 object
+open_nc = function(product_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
+                   credentials = get_credentials(),
+                   base_uri = "https://nrt.cmems-du.eu/thredds/dodsC"){
+  
+  creds = paste0(credentials[[1]], ":", credentials[[2]], "@")
+  uri = file.path(gsub("https://", paste0("https://", creds), base_uri, fixed = TRUE),
+                  product_id)
+  ncdf4::nc_open(uri)
+}
+
+
+

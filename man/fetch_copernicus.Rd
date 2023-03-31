@@ -5,9 +5,9 @@
 \title{Fetch Copernicus data as a list of \code{stars} objects}
 \usage{
 fetch_copernicus(
-  script = "global-analysis-forecast-phy-001-024",
+  script = "cmems_mod_glo_phy",
   date = Sys.Date(),
-  out_path = tempfile(pattern = "copernicus", tmpdir = "/dev/shm", fileext = ".nc"),
+  out_path = tempfile(pattern = "copernicus", tmpdir = tempdir(), fileext = ".nc"),
   cleanup = TRUE,
   ...
 )

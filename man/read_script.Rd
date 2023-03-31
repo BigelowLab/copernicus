@@ -2,10 +2,10 @@
 % Please edit documentation in R/script.R
 \name{read_script}
 \alias{read_script}
-\title{Read shell script into a characater array}
+\title{Read shell script into a character array}
 \usage{
 read_script(
-  name = "global-analysis-forecast-phy-001-024",
+  name = "cmems_mod_glo_phy",
   path = system.file("scripts", package = "copernicus")
 )
 }
@@ -18,5 +18,5 @@ read_script(
 named character vector with 'app' and 'param'
 }
 \description{
-Read shell script into a characater array
+Read shell script into a character array
 }

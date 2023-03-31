@@ -4,7 +4,7 @@
 \alias{copernicus_path}
 \title{Retrieve the copernicus path}
 \usage{
-copernicus_path(..., root = "/mnt/ecocast/coredata/copernicus")
+copernicus_path(..., root = root_path())
 }
 \arguments{
 \item{...}{further arguments for \code{file.path()}}

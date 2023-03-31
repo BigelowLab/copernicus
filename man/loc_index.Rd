@@ -4,7 +4,7 @@
 \alias{loc_index}
 \title{Find the closest indices into a dimension for a given set of values}
 \usage{
-loc_index(x, value, what = "lon", make_rle = FALSE)
+loc_index(x, value, what = "lon", pad = FALSE, make_rle = FALSE)
 }
 \arguments{
 \item{x}{ncdf4 object}
@@ -12,6 +12,13 @@ loc_index(x, value, what = "lon", make_rle = FALSE)
 \item{value}{vector of one of values (numeric for lon, lat, depth and POSIXct for time)}
 
 \item{what}{character, the name of the dimension}
+
+\item{pad}{logical, if TRUE then pad the indices by [-1, +1]
+Ignored unless what is "lon" or "lat" in which case we assume that
+value is provided as a two element vector of [min,max] (like for 
+a bounding box).  If TRUE, then we add [-res/2, res/2] to [min, max]
+ensuring that the user supplied locations are fully enclosed by the
+returned location indices.}
 
 \item{make_rle}{logical, if TRUE use the first and last elements of value (which
 may also be the first) to construct \code{[start, length]} encodings}

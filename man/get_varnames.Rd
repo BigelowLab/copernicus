@@ -32,10 +32,10 @@ Retrieve information about a grads resource
 }
 \section{Functions}{
 \itemize{
-\item \code{get_dimnames}: Retrieve the names of available dimensions
+\item \code{get_dimnames()}: Retrieve the names of available dimensions
 
-\item \code{get_dims}: Retrieve the dimensions
+\item \code{get_dims()}: Retrieve the dimensions
 
-\item \code{list_dims}: Retrieve the dimensions
+\item \code{list_dims()}: Retrieve the dimensions
+
 }}
-

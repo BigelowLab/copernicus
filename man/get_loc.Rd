@@ -13,7 +13,7 @@ get_lat(x)
 
 get_depth(x)
 
-get_loc(x, what = "time")
+get_loc(x, what = "time", ...)
 }
 \arguments{
 \item{x}{ncdf4 object}
@@ -39,10 +39,10 @@ Retrieve geospatial information about a grads resource
 }
 \section{Functions}{
 \itemize{
-\item \code{get_lon}: retrieve numeric longitudes
+\item \code{get_lon()}: retrieve numeric longitudes
 
-\item \code{get_lat}: retrieve numeric latitudes
+\item \code{get_lat()}: retrieve numeric latitudes
 
-\item \code{get_depth}: retrieve numeric depths
+\item \code{get_depth()}: retrieve numeric depths
+
 }}
-

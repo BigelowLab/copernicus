@@ -30,19 +30,40 @@ unpack_copernicus <- function(filename, banded = FALSE){
 #' @param cleanup logical, if TRUE clean up files
 #' @param ... further arguments for \code{\link{populate_script}}
 #' @return named list of stars objects (organized by variable)
-fetch_copernicus <- function(script = "global-analysis-forecast-phy-001-024",
+fetch_copernicus <- function(script = "cmems_mod_glo_phy",
                              date = Sys.Date(),
                              out_path = tempfile(pattern= 'copernicus',
-                                                 tmpdir = "/dev/shm",
+                                                 tmpdir = tempdir(),
                                                  fileext = ".nc"),
                              cleanup = TRUE,
                              ...){
 
-  ok <- read_script(name = script) %>%
+  if (FALSE){
+    script = "cmems_mod_glo_phy"
+    date = Sys.Date()
+    out_path = tempfile(pattern= 'copernicus',
+                        tmpdir = tempdir(),
+                        fileext = ".nc")
+    cleanup = TRUE
+    product_id = 'cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m'
+    variables = c("vo")
+    
+    ok <- read_script(name = script) |>
+      populate_script(dates = date,
+                      out_dir = dirname(out_path[1]),
+                      out_name = basename(out_path[1]),
+                      product_id = product_id,
+                      variables = variables) |>
+      download_copernicus()
+    
+    
+  }
+  
+  ok <- read_script(name = script) |>
     populate_script(dates = date,
                     out_dir = dirname(out_path[1]),
                     out_name = basename(out_path[1]),
-                    ...) %>%
+                    ...) |>
     download_copernicus()
 
   if (ok != 0){

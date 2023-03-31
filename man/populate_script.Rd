@@ -10,12 +10,12 @@ populate_script(
   dates = Sys.Date() + c(-2, -1),
   times = c("01:00:00", "23:00:00"),
   depths = c(0.493, 0.4942),
+  product_id = "foo",
   variables = c("bottomT", "mlotst", "siconc", "sithick", "so", "thetao", "uo", "usi",
     "vo", "vsi", "zos"),
   out_dir = copernicus_path("tmp"),
   out_name = sprintf("copernicus_\%s.nc", format(Sys.Date(), "\%Y-\%m-\%d")),
-  username = NULL,
-  password = NULL,
+  credentials = NULL,
   ...
 )
 }
@@ -30,15 +30,15 @@ populate_script(
 
 \item{depths}{2 element numeric,  depth [min, max]}
 
+\item{product_id}{char the product id ala 'cmems_mod_glo_phy-so_anfc_0.083deg_P1D-m'}
+
 \item{variables}{character vector, variable names}
 
 \item{out_dir}{character, output directory}
 
 \item{out_name}{character, output filename}
 
-\item{username}{character or NULL, (if NULL get from options)}
-
-\item{password}{character or NULL, (if NULL get from options)}
+\item{credentials}{character or NULL, (if NULL get from options)}
 
 \item{...}{ignored}
 }

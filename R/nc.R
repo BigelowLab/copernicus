@@ -23,7 +23,13 @@ get_dim <- function(x, what = c("time", "latitude", "longitude",
 #' @return vector of numeric [xres, yres]
 get_res <- function(x){
   lon = ncdf4::ncatt_get(x, "longitude")
+  if (is.null(lon$step)){
+    lon$step = abs(mean(diff(x$dim$longitude$vals)))
+  }
   lat = ncdf4::ncatt_get(x, "latitude")
+  if (is.null(lat$step)){
+    lat$step = abs(mean(diff(x$dim$latitude$vals)))
+  }
   c(lon$step, lat$step)
 }
 
@@ -47,7 +53,12 @@ get_lat <- function(x){
 #' @return numeric depth locations
 get_depth <- function(x){
   stopifnot(inherits(x, "ncdf4"))
-  x$dim$depth$vals
+  if (!("depth") %in% names(x$dim)){
+    depth = NULL
+  } else {
+    depth = x$dim$depth$vals
+  }
+  depth
 }
 
 #' Retrieve the time dimension values
@@ -56,10 +67,28 @@ get_depth <- function(x){
 #' @param x ncdf4 object
 #' @return POSIXct vector
 get_time <- function(x){
+  stopifnot(inherits(x, "ncdf4"))
+  # pretty weak ...
+  guess_format = function(x){
+    if (grep("1970-01-01 00:00:00", x$dim$time$units, fixed = TRUE)){
+     f = sub("1970-01-01 00:00:00", "%Y-%m-%d %H:%M:%S", x$dim$time$units, fixed = TRUE)
+    }
+    f
+  }
+  
+  # scaling for time
+  guess_scale = function(x){
+    u = strsplit(x$dim$time$units, " ", fixed = TRUE)[[1]][1]
+    switch(tolower(u),
+           'seconds' = 1,
+           'minutes' = 60,
+           'hours' = 3600)
+  }
+  
   origin <- as.POSIXct(x$dim$time$units,
-                       format = "hours since %Y-%m-%d %H:%M:%S",
+                       format = guess_format(x),
                        tz = 'UTC')
-  origin + (3600 * x$dim$time$vals)
+  origin + (guess_scale(x) * x$dim$time$vals)
 }
 
 

@@ -1,6 +1,6 @@
 #' Retrieve copernicus credentials.  One only needs credentials to download
 #' data from the CMEMS servers.  Credentials are not required to access the locally
-#' stored copernis data (but file permissions are).
+#' stored copernicus data (but file permissions are).
 #' 
 #' @export
 #' @param filename the name file that stores the credential in a one-line text file

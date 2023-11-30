@@ -4,7 +4,7 @@
 \alias{get_credentials}
 \title{Retrieve copernicus credentials.  One only needs credentials to download
 data from the CMEMS servers.  Credentials are not required to access the locally
-stored copernis data (but file permissions are).}
+stored copernicus data (but file permissions are).}
 \usage{
 get_credentials(filename = "~/.copernicuscredentials", parse = TRUE)
 }
@@ -21,5 +21,5 @@ character \code{username:password}, a named vector or or NULL if the file is not
 \description{
 Retrieve copernicus credentials.  One only needs credentials to download
 data from the CMEMS servers.  Credentials are not required to access the locally
-stored copernis data (but file permissions are).
+stored copernicus data (but file permissions are).
 }

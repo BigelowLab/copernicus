@@ -32,7 +32,7 @@ is the first depth in the object.  Ignored if \code{depth} is not
 a dimension of the variable.}
 
 \item{banded}{logical, if TRUE then retrieve mutliple bands (time/depth). If
-FALSE then allow only one value for time and depth and degenrate dimensions}
+FALSE then allow only one value for time and depth and degenerate dimensions}
 
 \item{form}{character, either 'array' of 'stars' (default)
 \itemize{

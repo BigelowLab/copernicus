@@ -82,6 +82,80 @@ populate_script <- function(template = read_script(),
 #' \item{param the parameter (argument) vector fully populated}
 #' }
 #' @return integer with 0 for success
-download_copernicus <- function(x = populate_script()){
+download_copernicus_script <- function(x = populate_script()){
+  
+  #.Deprecated("download_copernicus_cli", 
+  #            package="copernicus", 
+  #            old = as.character(sys.call(sys.parent()))[1L])
+  
   system2(x[['app']], x[['param']])
 }
+
+
+#' Fetch Copernicus data as a list of \code{stars} objects
+#'
+#' This is a wrapper around \code{\link{download_copernicus}} that
+#' hides the details and returns a list of \code{stars} objects.  The downloaded
+#' file is deleted.
+#'
+#' @export
+#' @param script character, the name of the script to use
+#' @param date Date class or castable as Date
+#' @param out_path character, the temporary path to store the downloaded file
+#' @param cleanup logical, if TRUE clean up files
+#' @param ... further arguments for \code{\link{populate_script}}
+#' @return named list of stars objects (organized by variable)
+fetch_copernicus_script <- function(script = "cmems_mod_glo_phy",
+                                    date = Sys.Date(),
+                                    out_path = tempfile(pattern= 'copernicus',
+                                                        tmpdir = tempdir(),
+                                                        fileext = ".nc"),
+                                    cleanup = TRUE,
+                                    ...){
+  
+  # .Deprecated("fetch_copernicus(use = 'cli', ...)", 
+  #             package="copernicus", 
+  #             "please select another value for use",
+  #             old = as.character(sys.call(sys.parent()))[1L])
+  
+  if (FALSE){
+    script = "cmems_mod_glo_phy"
+    date = Sys.Date()
+    out_path = tempfile(pattern= 'copernicus',
+                        tmpdir = tempdir(),
+                        fileext = ".nc")
+    cleanup = TRUE
+    product_id = 'cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m'
+    variables = c("vo")
+    
+    ok <- read_script(name = script) |>
+      populate_script(dates = date,
+                      out_dir = dirname(out_path[1]),
+                      out_name = basename(out_path[1]),
+                      product_id = product_id,
+                      variables = variables) |>
+      download_copernicus_script()
+    
+    
+  }
+  
+  ok <- read_script(name = script) |>
+    populate_script(dates = date,
+                    out_dir = dirname(out_path[1]),
+                    out_name = basename(out_path[1]),
+                    ...) |>
+    download_copernicus_script()
+  
+  if (ok != 0){
+    warning("unable to download copernicus data to", out_path[1])
+    return(NULL)
+  }
+  ss <- unpack_copernicus(out_path[1])
+  if (cleanup){
+    ok <- file.remove(out_path)
+    if (!ok) warning("unable to remove file:", out_path[1])
+  }
+  ss
+}
+
+

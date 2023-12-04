@@ -70,7 +70,11 @@ get_time <- function(x){
   stopifnot(inherits(x, "ncdf4"))
   # pretty weak ...
   guess_format = function(x){
-    if (grep("1970-01-01 00:00:00", x$dim$time$units, fixed = TRUE)){
+    if (x$dim$time$units == "hours since 1950-01-01"){
+      f = sub("1950-01-01", "%Y-%m-%d", x$dim$time$units, fixed = TRUE)
+    }
+    
+    if (grepl("1970-01-01 00:00:00", x$dim$time$units, fixed = TRUE)){
      f = sub("1970-01-01 00:00:00", "%Y-%m-%d %H:%M:%S", x$dim$time$units, fixed = TRUE)
     }
     f
@@ -323,7 +327,7 @@ get_var_array <- function(x, var, index, collapse_degen = FALSE){
 #'        is the first depth in the object.  Ignored if \code{depth} is not
 #'        a dimension of the variable.
 #' @param banded logical, if TRUE then retrieve mutliple bands (time/depth). If
-#'        FALSE then allow only one value for time and depth and degenrate dimensions
+#'        FALSE then allow only one value for time and depth and degenerate dimensions
 #' @param form character, either 'array' of 'stars' (default)
 #' \itemize{
 #'   \item{array}{an array or list of arrays, possibly degenerate to a matrix}

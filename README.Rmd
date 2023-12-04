@@ -5,13 +5,11 @@ output: github_document
 
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
-library(stars)
-library(copernicus)
 ```
 
 # copernicus
 
-Provides download, archiving and access to [Copernicus](https://marine.copernicus.eu/) marine local datasets.
+Provides download, archiving and access to [Copernicus](https://marine.copernicus.eu/) marine local datasets using R language.
 
 ### Requirements
 
@@ -31,7 +29,32 @@ Provides download, archiving and access to [Copernicus](https://marine.copernicu
 remotes::install_github("BigelowLab/copernicus")
 ```
 
-## Downloading
+
+### Configuration
+
+You can preconfigure a credentials file (required) and a path definition file (optional) to streamline accessing and storing data.
+
+#### Configure credentials
+
+You must have credentials to access Copernicus holdings - if you don't have them now please request access [here](https://data.marine.copernicus.eu/register). 
+
+Once you have them you can add them to a file hidden in your home directory. The functions in this package the require the credentials know where to look for them.  We don't actually run this in the README, but you can copy-and-paste to use in R.
+
+```
+library(copernicus)
+set_credentials("username:password")
+```
+
+#### Configure data path
+
+If you plan to use our directory-driven database storage system then you should set the root path for the data directory.  You can always change or override it, but, like credentials, storing this path in a hidden file will ease subsequent use of the functions. We don't actually run this in the README, but you can copy-and-paste to use in R.
+
+```
+set_root_path("/the/path/to/copernicus/data")
+```
+
+
+## Downloading data
 
 You don't need to download data unless you need to download areas outside of `nwa` `[-77.0, -42.5,  36.5,  56.7]` See the [wiki](https://github.com/BigelowLab/copernicus/wiki/Downloading) for hints.
 

@@ -61,7 +61,7 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
 #' @param verbose logical, if true pint the calling sequence excluding credentials
 #' @param credentials two element named character vector of \code{username} and \code{password}
 #' @return numeric, 0 for success
-fetch_cli_subset = function(..., verbose = FALSE, credentials = get_credentials()){
+download_copernicus_cli = function(..., verbose = FALSE, credentials = get_credentials()){
   x = build_cli_subset(...)
   if (verbose){
     s = sprintf("%s %s", x[['app']], args = x[['args']])
@@ -72,4 +72,31 @@ fetch_cli_subset = function(..., verbose = FALSE, credentials = get_credentials(
                       credentials[['password']])
   
   system2(x[['app']], args = x[['args']])
+}
+
+ 
+#' Fetch Copernicus data as a list of \code{stars} objects
+#'
+#' This is a wrapper around \code{\link{download_copernicus_cli}} that
+#' hides the details and returns a list of \code{stars} objects.  The downloaded
+#' file is deleted.
+#'
+#' @export
+#' @param ofile chr, the temporary (?) outfile
+#' @inheritDotParams download_copernicus_cli
+#' @param cleanup logical, if TRUE clean up files
+#' @return named list of stars objects (organized by variable)
+fetch_copernicus_cli = function(ofile = "output.nc", 
+                                cleanup = TRUE,
+                                ...){
+  
+  ok = download_copernicus_cli(ofile = ofile, ...)
+  if (ok != 0){
+    message("download failed for", basename(ofile))
+    return(NULL)
+  }
+  
+  x = unpack_copernicus(ofile)
+  if (cleanup) file.remove(ofile)
+  x
 }

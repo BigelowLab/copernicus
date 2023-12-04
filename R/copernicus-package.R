@@ -1,3 +1,6 @@
+#' @keywords internal 
+"_PACKAGE"
+
 #' copernicus package
 #'
 #' @name copernicus-package

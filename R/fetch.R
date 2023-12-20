@@ -2,12 +2,18 @@
 #' 
 #' @export
 #' @param use char, download method one of 'cli' or 'script' (deprecated)
-#' @inheritDotParams download_copernicus_cli
+#' @param bind logical, if TRUE bind the elements of the returned into a single 
+#'   multi-attribute stars object.
+#' @inheritDotParams download_copernicus_cli_subset
 fetch_copernicus = function(use = c("cli", "script")[1], 
+                            bind = TRUE,
                             ...){
-  
   use = tolower(use[1])
-  switch(use,
-         'cli' = fetch_copernicus_cli(...),
+  x = switch(use,
+         'cli' = fetch_copernicus_cli_subset(...),
          'script' = fetch_copernicus_script(...)) 
+  if (!is.null(x) && !inherits(x, 'stars') && bind){
+    x = bind_stars(x)
+  }
+  x
 }

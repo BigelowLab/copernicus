@@ -84,7 +84,7 @@ populate_script <- function(template = read_script(),
 #' @return integer with 0 for success
 download_copernicus_script <- function(x = populate_script()){
   
-  #.Deprecated("download_copernicus_cli", 
+  #.Deprecated("download_copernicus_cli_subset", 
   #            package="copernicus", 
   #            old = as.character(sys.call(sys.parent()))[1L])
   

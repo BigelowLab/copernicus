@@ -6,12 +6,15 @@
 \usage{
 build_cli_subset(
   dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
-  vars = c("uo", "vo"),
+  vars =
+    unlist(dplyr::pull(dplyr::filter(product_lut("GLOBAL_ANALYSISFORECAST_PHY_001_024"),
+    datasetid == dataset_id), .data$variables)),
   bb = c(xmin = 5, ymin = 38, xmax = 10, ymax = 42),
   depth = c(0, 10),
   time = c("2022-01-01", "2022-01-15"),
-  ofile = "output.nc",
-  extra = "--force-download  --overwrite",
+  ofile = file.path(getwd(), "output.nc"),
+  loglevel = "QUIET",
+  extra = "--force-download --overwrite",
   app = "copernicus-marine"
 )
 }
@@ -28,6 +31,8 @@ a 4 element named vector with "xmin", "xmax", "ymin" and "ymax" named elements}
 \item{time}{POSIXct, Date or character, start and stop times}
 
 \item{ofile}{char, the output filename (default is "./output.nc")}
+
+\item{loglevel}{char, one of DEBUG,INFO,WARN,ERROR,CRITICAL,QUIET}
 
 \item{extra}{NULL or character, any other arguments for \code{copernicus-marine subset}}
 

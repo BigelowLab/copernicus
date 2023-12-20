@@ -9,20 +9,25 @@
 #' @param time POSIXct, Date or character, start and stop times
 #' @param depth numeric of NULL, two element vector of min and max depths
 #' @param ofile char, the output filename (default is "./output.nc")
+#' @param loglevel char, one of DEBUG,INFO,WARN,ERROR,CRITICAL,QUIET
 #' @param extra NULL or character, any other arguments for \code{copernicus-marine subset}
 #' @param app char, the name of the application to run (default is "copernicus-marine")
 #' @return named 2 element character vector of the app and the args
 #' copernicus-marine subset -i cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m -x 5.0 -X 10.0 -y 38.0 -Y 42.0 -z 0. -Z 10. -v uo -v vo -t 2022-01-01 -T 2022-01-15 -o ./copernicus-data -f dataset_subset.nc
 build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
-                            vars = c("uo","vo"),
+                            vars = product_lut('GLOBAL_ANALYSISFORECAST_PHY_001_024') |>
+                              dplyr::filter(datasetid == dataset_id) |>
+                              dplyr::pull(.data$variables) |>
+                              unlist(),
                             bb = c(xmin = 5, ymin = 38, xmax = 10, ymax = 42),
                             depth = c(0, 10),
                             time = c("2022-01-01", "2022-01-15"),
-                            ofile = "output.nc",
-                            extra = "--force-download  --overwrite",
+                            ofile = file.path(getwd(), "output.nc"),
+                            loglevel = 'QUIET',
+                            extra = "--force-download --overwrite",
                             app = "copernicus-marine"){
   
-  args = sprintf("subset -i %s", dataset_id[1])
+  args = sprintf("subset -i %s --log-level %s", dataset_id[1], toupper(loglevel))
   if (!is.null(vars)){
     s = paste(paste("-v", vars), collapse = " ")
     args = sprintf("%s %s", args, s)
@@ -37,12 +42,7 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
     args = sprintf("%s %s", args, s)
   }
   if (!is.null(time)){
-    if (!inherits(time, "character")) {
-      time = format(time, "%Y-%m-%dT%H:%M:%S")
-    } else {
-      time = as.Date(time, format = "%Y-%m-%d") |>
-        format("%Y-%m-%dT%H:%M:%S")
-    }
+    time = time_as_string(time)
     s = sprintf('-t "%s" -T "%s"', time[1], time[2])
     args = sprintf("%s %s", args, s)
   }
@@ -61,7 +61,7 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
 #' @param verbose logical, if true pint the calling sequence excluding credentials
 #' @param credentials two element named character vector of \code{username} and \code{password}
 #' @return numeric, 0 for success
-download_copernicus_cli = function(..., verbose = FALSE, credentials = get_credentials()){
+download_copernicus_cli_subset = function(..., verbose = FALSE, credentials = get_credentials()){
   x = build_cli_subset(...)
   if (verbose){
     s = sprintf("%s %s", x[['app']], args = x[['args']])
@@ -77,22 +77,22 @@ download_copernicus_cli = function(..., verbose = FALSE, credentials = get_crede
  
 #' Fetch Copernicus data as a list of \code{stars} objects
 #'
-#' This is a wrapper around \code{\link{download_copernicus_cli}} that
+#' This is a wrapper around \code{\link{download_copernicus_cli_subset}} that
 #' hides the details and returns a list of \code{stars} objects.  The downloaded
 #' file is deleted.
 #'
 #' @export
 #' @param ofile chr, the temporary (?) outfile
-#' @inheritDotParams download_copernicus_cli
+#' @inheritDotParams download_copernicus_cli_subset
 #' @param cleanup logical, if TRUE clean up files
 #' @return named list of stars objects (organized by variable)
-fetch_copernicus_cli = function(ofile = "output.nc", 
+fetch_copernicus_cli_subset = function(ofile = "output.nc", 
                                 cleanup = TRUE,
                                 ...){
   
-  ok = download_copernicus_cli(ofile = ofile, ...)
+  ok = download_copernicus_cli_subset(ofile = ofile, ...)
   if (ok != 0){
-    message("download failed for", basename(ofile))
+    message("download failed for ", basename(ofile))
     return(NULL)
   }
   

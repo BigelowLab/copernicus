@@ -1,3 +1,18 @@
+#' Read a product LUT
+#' 
+#' @export
+#' @param productid cahr, the product indentifier
+#' @return tibble
+product_lut = function(productid = 'GLOBAL_ANALYSISFORECAST_PHY_001_024'){
+  
+  filename = system.file(file.path("lut", paste0(productid, ".csv")), package = "copernicus")
+  readr::read_csv(filename, show_col_types = FALSE) |>
+    dplyr::mutate(variables = strsplit(.data$variables, "+", fixed = TRUE),
+                  unit = strsplit(.data$unit, "+", fixed = TRUE))
+}
+
+
+
 #' Given a NCDF object (or path to one) create a variable lookup table (LUT)
 #' 
 #' @export

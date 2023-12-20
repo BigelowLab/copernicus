@@ -1,6 +1,16 @@
-library(copernicus)
-library(stars)
-library(dplyr)
+suppressPackageStartupMessages({
+  library(copernicus)
+  library(stars)
+  library(dplyr)
+})
+
+
+#' Build a dataset from scratch
+#' 
+#' @param 
+
+
+
 
 #' Build the database from scratch - this is a one off developed spring 2023
 #' as a result of data reorganization of the global_analysisforecast_phy_001_024
@@ -15,7 +25,7 @@ library(dplyr)
 #' @param service char, what service are we mining?
 #' @param region char, for what region?
 #' @param bb numeric, bounding box as [left, right, bottom, top]
-rebuild_dataset <- function(service = 'global_analysisforecast_phy_001_024',
+rebuild_dataset_v0.1 <- function(service = 'global_analysisforecast_phy_001_024',
                             region = 'nwa',
                             bb = cofbb::get_bb("nwa2")){
   

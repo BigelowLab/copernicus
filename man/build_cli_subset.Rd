@@ -12,10 +12,10 @@ build_cli_subset(
   bb = c(xmin = 5, ymin = 38, xmax = 10, ymax = 42),
   depth = c(0, 10),
   time = c("2022-01-01", "2022-01-15"),
-  ofile = file.path(getwd(), "output.nc"),
+  ofile = "~/output.nc",
   loglevel = "QUIET",
-  extra = "--force-download --overwrite",
-  app = "copernicus-marine"
+  extra = "--overwrite",
+  app = "copernicusmarine"
 )
 }
 \arguments{

@@ -38,8 +38,8 @@ decompose_filename = function(x = "copernicus__2022-01-15T000000_9.573_day_vo_ra
   global_sub <- function(x, pattern, replacement = ".tif", fixed = TRUE, ...){
     gsub(pattern, replacement, x, fixed = fixed, ...)
   }
-  x <- basename(x) %>%
-    global_sub(pattern = ext, replacement = "") %>%
+  x <- basename(x) |>
+    global_sub(pattern = ext, replacement = "") |>
     strsplit(split = "__", fixed = TRUE)
   y = sapply(x, '[[', 2) |>
     strsplit(split = "_", fixed = TRUE)
@@ -93,8 +93,8 @@ decompose_filename_v0.01 <- function(x = "2021-03-20_zos_sur.tif",
   global_sub <- function(x, pattern, replacement = ".tif", fixed = TRUE, ...){
     gsub(pattern, replacement, x, fixed = fixed, ...)
   }
-  x <- basename(x) %>%
-    global_sub(pattern = ext, replacement = "") %>%
+  x <- basename(x) |>
+    global_sub(pattern = ext, replacement = "") |>
     strsplit(split = "_", fixed = TRUE)
   # <path>/YYYY/mmdd/YYYY-mm-dd_trt_param.tif
   dplyr::tibble(
@@ -113,7 +113,7 @@ decompose_filename_v0.01 <- function(x = "2021-03-20_zos_sur.tif",
 build_database <- function(path, pattern = "*.tif", ...){
   if (missing(path)) stop("path is required")
   list.files(path[1], pattern = utils::glob2rx(pattern),
-             recursive = TRUE, full.names = TRUE) %>%
+             recursive = TRUE, full.names = TRUE) |>
     decompose_filename(...)
 }
 
@@ -150,7 +150,7 @@ write_database <- function(x, path,
   filepath <- file.path(path[1], filename[1])
   # date var depth
   dummy <- x |>
-    #dplyr::select(.data$date, .data$var, .data$depth) %>%
+    #dplyr::select(.data$date, .data$var, .data$depth) |>
     readr::write_csv(filepath)
   invisible(x)
 }

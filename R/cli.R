@@ -22,10 +22,10 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
                             bb = c(xmin = 5, ymin = 38, xmax = 10, ymax = 42),
                             depth = c(0, 10),
                             time = c("2022-01-01", "2022-01-15"),
-                            ofile = file.path(getwd(), "output.nc"),
+                            ofile = "~/output.nc",
                             loglevel = 'QUIET',
-                            extra = "--force-download --overwrite",
-                            app = "copernicus-marine"){
+                            extra = "--overwrite",
+                            app = "copernicusmarine"){
   
   args = sprintf("subset -i %s --log-level %s", dataset_id[1], toupper(loglevel))
   if (!is.null(vars)){
@@ -59,17 +59,14 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
 #' 
 #' @param ... arguments for \code{\link{build_cli_subset}}
 #' @param verbose logical, if true pint the calling sequence excluding credentials
-#' @param credentials two element named character vector of \code{username} and \code{password}
 #' @return numeric, 0 for success
-download_copernicus_cli_subset = function(..., verbose = FALSE, credentials = get_credentials()){
+download_copernicus_cli_subset = function(..., verbose = FALSE){
   x = build_cli_subset(...)
   if (verbose){
     s = sprintf("%s %s", x[['app']], args = x[['args']])
     cat(s, "\n")
   }
-  x[['args']] = sprintf("%s --username %s --password %s",x[['args']], 
-                      credentials[['username']],
-                      credentials[['password']])
+  x[['args']] = sprintf("%s",x[['args']])
   
   system2(x[['app']], args = x[['args']])
 }

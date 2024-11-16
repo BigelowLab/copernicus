@@ -1,7 +1,7 @@
 Package: copernicus
 Type: Package
 Title: Serves Center for Ocean Forecasting Copernicus needs
-Version: 0.2.0
+Version: 0.3.0
 Author: Ben Tupper
 Maintainer: Ben Tupper <btupper@bigelow.org>
 Description: Provides download, archiving and access to Copernicus related local datasets.
@@ -16,4 +16,4 @@ Imports:
   stars,
   readr,
   twinkle
-RoxygenNote: 7.2.3
+RoxygenNote: 7.3.2

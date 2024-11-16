@@ -4,18 +4,12 @@
 \alias{download_copernicus_cli_subset}
 \title{Fetch via copernicus-marine subset}
 \usage{
-download_copernicus_cli_subset(
-  ...,
-  verbose = FALSE,
-  credentials = get_credentials()
-)
+download_copernicus_cli_subset(..., verbose = FALSE)
 }
 \arguments{
 \item{...}{arguments for \code{\link{build_cli_subset}}}
 
 \item{verbose}{logical, if true pint the calling sequence excluding credentials}
-
-\item{credentials}{two element named character vector of \code{username} and \code{password}}
 }
 \value{
 numeric, 0 for success

@@ -1,7 +1,8 @@
+
 #' Retrieve copernicus credentials.  One only needs credentials to download
 #' data from the CMEMS servers.  Credentials are not required to access the locally
 #' stored copernicus data (but file permissions are).
-#' 
+#' @rdname copernicus-deprecated
 #' @export
 #' @param filename the name file that stores the credential in a one-line text file
 #'    as \code{username:password}
@@ -10,6 +11,9 @@
 #' @return character \code{username:password}, a named vector or or NULL if the file is not found.
 get_credentials <- function(filename = "~/.copernicuscredentials",
                             parse = TRUE){
+  .Deprecated("",
+              package = "copernicus",
+              msg = "please use `copernicusmarine login` application instead")
   if (!file.exists(filename[1])){
     warning("credentials file not found:", filename[1])
     creds = NULL
@@ -26,12 +30,16 @@ get_credentials <- function(filename = "~/.copernicuscredentials",
 
 #' Write copernicus credentials to a file
 #'
+#' @rdname copernicus-deprecated
 #' @export
 #' @param x char, credentials as \code{"username:password"}
 #' @param filename the name the file to store the credentials as a single line of text
 #' @return NULL invisibly
 set_credentials <- function(x = "username:password",
                           filename = "~/.copernicuscredentials"){
+  .Deprecated("",
+              package = "copernicus",
+              msg = "please use `copernicusmarine login` application instead")
   cat(x[1], sep = "\n", file = filename)
   invisible(NULL)
 }

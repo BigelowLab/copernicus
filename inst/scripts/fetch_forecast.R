@@ -42,9 +42,9 @@ ff <- lapply(seq_along(dates), function(i) fetch_one(dates[i]))
 
 log_info("updating database")
 DB <- copernicus::read_database(OPATH)
-db <- unlist(ff) %>%
-  copernicus::decompose_filename() %>%
-  copernicus::append_database(DB) %>%
-  dplyr::arrange(date) %>%
+db <- unlist(ff) |>
+  copernicus::decompose_filename() |>
+  copernicus::append_database(DB) |>
+  dplyr::arrange(date) |>
   copernicus::write_database(OPATH)
 log_success("done")

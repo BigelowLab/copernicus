@@ -10,12 +10,16 @@ but with no or minimal modification it can work with other products.
 
 ### Note
 
-In 2023/2024 Copernicus migrated to a new service model. Learn more
-[here](Migrating%20to%20the%20new%20Global%20Physical%20Analysis%20and%20Forecasting%20System).
+In 2023/2024 Copernicus migrated to a new service model; learn more
+[here](https://help.marine.copernicus.eu/en/articles/7045314-migrating-to-the-new-global-physical-analysis-and-forecasting-system).
 This migration introduced the [Copernicus Marine
 Toolbox](https://help.marine.copernicus.eu/en/collections/4060068-copernicus-marine-toolbox)
 which provides a Python API and a command line interface (CLI). This
 package leverages the latter.
+
+The toolbox is under active development, so if you are having troubles
+(like we have sometimes!) try reinstalling. We have some notes
+[here](https://github.com/BigelowLab/copernicus/wiki/Installation-of-%60copernicusmarine%60).
 
 ## Copernicus resources
 
@@ -46,17 +50,18 @@ variable, spatial bounding box and time. This package only supports
 
 ## Requirements
 
-- [R v4+](https://www.r-project.org/)
+- [R v4.1+](https://www.r-project.org/)
 - [rlang](https://CRAN.R-project.org/package=rlang)
 - [dplyr](https://CRAN.R-project.org/package=dplyr)
 - [ncdf4](https://CRAN.R-project.org/package=ncdf4)
 - [sf](https://CRAN.R-project.org/package=sf)
 - [stars](https://CRAN.R-project.org/package=stars)
 - [readr](https://CRAN.R-project.org/package=readr)
-- [twinkle](https://github.com/BigelowLab/twinkle)
+- [twinkle](https://github.com/BigelowLab/twinkle) (not on CRAN)
 
 ## Installation
 
+    remotes::install_github("BigelowLab/twinkle")
     remotes::install_github("BigelowLab/copernicus")
 
 ## Configuration
@@ -70,14 +75,10 @@ You must have credentials to access Copernicus holdings - if you don’t
 have them now please request access
 [here](https://data.marine.copernicus.eu/register).
 
-Once you have them you can add them to a file hidden in your home
-directory. The functions in this package that require the credentials
-know where to look for them. We don’t actually run this in the README,
-but you can copy-and-paste to use in R; obviously you will insert your
-own username and password.
-
-    library(copernicus)
-    set_credentials("username:password")
+Once you have them you can add them you need to run a
+[`copernicusmarine`
+app](https://github.com/BigelowLab/copernicus/wiki/Installation-of-%60copernicusmarine%60)
+to set them.
 
 ### Configure data path
 
@@ -116,7 +117,7 @@ x = fetch_copernicus(dataset_id = dataset_id,
                      verbose = TRUE)
 ```
 
-    ## copernicus-marine subset -i cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m --log-level QUIET -v uo -v vo -x -72.00 -X -63.00 -y 39.00 -Y 46.00 -z 0.00 -Z 10.00 -t "2023-12-20" -T "2023-12-29" --force-download --overwrite -f output.nc -o .
+    ## copernicusmarine subset -i cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m --log-level QUIET -v uo -v vo -x -72.00 -X -63.00 -y 39.00 -Y 46.00 -z 0.00 -Z 10.00 -t "2024-11-15" -T "2024-11-24" --overwrite -f output.nc -o .
 
 ``` r
 x
@@ -124,15 +125,15 @@ x
 
     ## stars object with 4 dimensions and 2 attributes
     ## attribute(s):
-    ##           Min.     1st Qu.       Median         Mean    3rd Qu.     Max.   NA's
-    ## uo  -0.7963526 -0.08457322 -0.003029692 3.098703e-02 0.07812081 1.509007 216380
-    ## vo  -1.4806886 -0.08874905 -0.020613649 3.607781e-05 0.04513337 1.390010 216380
+    ##           Min.     1st Qu.      Median        Mean     3rd Qu.     Max.   NA's
+    ## uo  -0.6483049 -0.10751992 -0.03664098 -0.02019374 0.012626727 1.486507 216320
+    ## vo  -0.5238913 -0.09847574 -0.04307169 -0.02811467 0.004602717 1.044959 216320
     ## dimension(s):
     ##       from  to         offset    delta  refsys
     ## x        1 109         -72.04  0.08333  WGS 84
     ## y        1  85          46.04 -0.08333  WGS 84
     ## depth    1   8             NA       NA      NA
-    ## time     1  10 2023-12-20 UTC   1 days POSIXct
+    ## time     1  10 2024-11-15 UTC   1 days POSIXct
     ##                                            values x/y
     ## x                                            NULL [x]
     ## y                                            NULL [y]
@@ -212,7 +213,7 @@ db = archive_copernicus(x, path = path, id = 'cmems_mod_glo_phy-cur_anfc_0.083de
     ## Rows: 160
     ## Columns: 7
     ## $ id        <chr> "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m", "cmems_mod_glo_…
-    ## $ date      <date> 2023-12-20, 2023-12-20, 2023-12-21, 2023-12-21, 2023-12-22,…
+    ## $ date      <date> 2024-11-15, 2024-11-15, 2024-11-16, 2024-11-16, 2024-11-17,…
     ## $ time      <chr> "000000", "000000", "000000", "000000", "000000", "000000", …
     ## $ depth     <chr> "0.494", "0.494", "0.494", "0.494", "0.494", "0.494", "0.494…
     ## $ period    <chr> "day", "day", "day", "day", "day", "day", "day", "day", "day…
@@ -228,7 +229,7 @@ write_database(db, path)
 
 ### Using the database
 
-The database is very lightand easy to filter for just the records you
+The database is very light and easy to filter for just the records you
 might need. Note that depth is a character data type; this provides you
 with flexibility to define depth as ‘surface’ or ‘50-75’ or something
 like that.
@@ -245,7 +246,7 @@ db <- copernicus::read_database(path) |>
     ## Rows: 32
     ## Columns: 7
     ## $ id        <chr> "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m", "cmems_mod_glo_…
-    ## $ date      <date> 2023-12-20, 2023-12-20, 2023-12-21, 2023-12-21, 2023-12-20,…
+    ## $ date      <date> 2024-11-15, 2024-11-15, 2024-11-16, 2024-11-16, 2024-11-15,…
     ## $ time      <chr> "000000", "000000", "000000", "000000", "000000", "000000", …
     ## $ depth     <chr> "0.494", "0.494", "0.494", "0.494", "1.541", "1.541", "1.541…
     ## $ period    <chr> "day", "day", "day", "day", "day", "day", "day", "day", "day…
@@ -261,15 +262,15 @@ s
 
     ## stars object with 4 dimensions and 2 attributes
     ## attribute(s):
-    ##           Min.    1st Qu.      Median        Mean     3rd Qu.     Max.  NA's
-    ## uo  -0.5541596 -0.1364145 -0.04991820 -0.01058245 0.028018354 1.430314 43276
-    ## vo  -0.9301572 -0.1236051 -0.06047948 -0.04066983 0.003148441 1.390010 43276
+    ##           Min.    1st Qu.      Median        Mean      3rd Qu.      Max.  NA's
+    ## uo  -0.6483049 -0.1503338 -0.05121171 -0.03224251  0.013144923 1.4865069 43264
+    ## vo  -0.4451101 -0.1224391 -0.05912938 -0.04963893 -0.007916083 0.9898032 43264
     ## dimension(s):
     ##       from  to         offset    delta  refsys point
     ## x        1 109         -72.04  0.08333  WGS 84 FALSE
     ## y        1  85          46.04 -0.08333  WGS 84 FALSE
     ## depth    1   8             NA       NA      NA    NA
-    ## time     1   2 2023-12-20 UTC   1 days POSIXct    NA
+    ## time     1   2 2024-11-15 UTC   1 days POSIXct    NA
     ##                                 values x/y
     ## x                                 NULL [x]
     ## y                                 NULL [y]

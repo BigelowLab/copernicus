@@ -39,6 +39,7 @@ read_copernicus = function(db, path, depth = as.numeric(db$depth)){
   
 }
 
+
 #' Unpack a copernicus ncdf4 file
 #'
 #' @export

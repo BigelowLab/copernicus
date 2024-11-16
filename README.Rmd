@@ -11,7 +11,9 @@ Provides access, download and archiving tools for [Copernicus](https://marine.co
 
 ### Note
 
-In 2023/2024 Copernicus migrated to a new service model.  Learn more [here](Migrating to the new Global Physical Analysis and Forecasting System). This migration introduced the [Copernicus Marine Toolbox](https://help.marine.copernicus.eu/en/collections/4060068-copernicus-marine-toolbox) which provides a Python API and a command line interface (CLI).  This package leverages the latter.
+In 2023/2024 Copernicus migrated to a new service model; learn more [here](https://help.marine.copernicus.eu/en/articles/7045314-migrating-to-the-new-global-physical-analysis-and-forecasting-system). This migration introduced the [Copernicus Marine Toolbox](https://help.marine.copernicus.eu/en/collections/4060068-copernicus-marine-toolbox) which provides a Python API and a command line interface (CLI).  This package leverages the latter.
+
+The toolbox is under active development, so if you are having troubles (like we have sometimes!) try reinstalling.  We have some notes [here](https://github.com/BigelowLab/copernicus/wiki/Installation-of-%60copernicusmarine%60).
 
 ## Copernicus resources
 
@@ -27,19 +29,20 @@ The [Copernicus Marine Toolbox](https://help.marine.copernicus.eu/en/collections
 
 ## Requirements
 
-  + [R v4+](https://www.r-project.org/)
+  + [R v4.1+](https://www.r-project.org/)
   + [rlang](https://CRAN.R-project.org/package=rlang)
   + [dplyr](https://CRAN.R-project.org/package=dplyr)
   + [ncdf4](https://CRAN.R-project.org/package=ncdf4)
   + [sf](https://CRAN.R-project.org/package=sf)
   + [stars](https://CRAN.R-project.org/package=stars)
   + [readr](https://CRAN.R-project.org/package=readr)
-  + [twinkle](https://github.com/BigelowLab/twinkle)
+  + [twinkle](https://github.com/BigelowLab/twinkle) (not on CRAN)
   
 
 ## Installation
 
 ```
+remotes::install_github("BigelowLab/twinkle")
 remotes::install_github("BigelowLab/copernicus")
 ```
 
@@ -51,12 +54,7 @@ You can preconfigure a credentials file (required) and a path definition file (o
 
 You must have credentials to access Copernicus holdings - if you don't have them now please request access [here](https://data.marine.copernicus.eu/register). 
 
-Once you have them you can add them to a file hidden in your home directory. The functions in this package that require the credentials know where to look for them.  We don't actually run this in the README, but you can copy-and-paste to use in R; obviously you will insert your own username and password.
-
-```
-library(copernicus)
-set_credentials("username:password")
-```
+Once you have them you can add them you need to run a [`copernicusmarine` app](https://github.com/BigelowLab/copernicus/wiki/Installation-of-%60copernicusmarine%60) to set them.
 
 ### Configure data path
 
@@ -141,7 +139,7 @@ write_database(db, path)
 
 ### Using the database
 
-The database is very lightand easy to filter for just the records you might need. Note that depth is a character data type; this provides you with flexibility to define depth as 'surface' or '50-75' or something like that.
+The database is very light and easy to filter for just the records you might need. Note that depth is a character data type; this provides you with flexibility to define depth as 'surface' or '50-75' or something like that.
 
 Let's walk through reading the database, filtering it for a subset, reading the files and finally displaying.
 

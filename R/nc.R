@@ -492,24 +492,3 @@ get_var <- function(x,
   }
   stats::setNames(r, var)
 }
-
-
-#' Open a copernicus connection given a product id
-#' 
-#' @export
-#' @param product_id char, the product identifer
-#' @param credentials NULL or character vector 
-#' @param base_uri char base UIR for opendap
-#' @return ncdf4 object
-open_nc = function(product_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
-                   credentials = get_credentials(),
-                   base_uri = "https://nrt.cmems-du.eu/thredds/dodsC"){
-  
-  creds = paste0(credentials[[1]], ":", credentials[[2]], "@")
-  uri = file.path(gsub("https://", paste0("https://", creds), base_uri, fixed = TRUE),
-                  product_id)
-  ncdf4::nc_open(uri)
-}
-
-
-

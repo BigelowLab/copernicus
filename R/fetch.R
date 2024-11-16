@@ -11,7 +11,7 @@ fetch_copernicus = function(use = c("cli", "script")[1],
   use = tolower(use[1])
   x = switch(use,
          'cli' = fetch_copernicus_cli_subset(...),
-         'script' = fetch_copernicus_script(...)) 
+         stop("only cli downloads are supported")) 
   if (!is.null(x) && !inherits(x, 'stars') && bind){
     x = bind_stars(x)
   }

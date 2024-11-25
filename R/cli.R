@@ -1,3 +1,18 @@
+# A function to apply single non-fancy (or fancy) quotes
+#
+# @param x character string
+# @param fancy logical, curly quotes? (TRUE) or plain quotes (FALSE)?
+# @return single quoted value of x
+squote = function(x, fancy = FALSE){
+  on.exit({
+    options("useFancyQuotes")
+  })
+  orig_fancy = options("useFancyQuotes")
+  options(useFancyQuotes = fancy)
+  sQuote(x)
+}
+
+
 #' Build a CLI subset request 
 #' 
 #' See \href{https://help.marine.copernicus.eu/en/articles/7972861-copernicus-marine-toolbox-cli-subset#h_a906235d0a}{the docs}
@@ -49,7 +64,7 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
   
   if (!is.null(extra)) args = sprintf("%s %s", args, extra)
   
-  args = sprintf("%s -f %s -o %s", args, sQuote(basename(ofile)), sQuote(dirname(ofile))) 
+  args = sprintf("%s -f %s -o %s", args, squote(basename(ofile)), squote(dirname(ofile))) 
   
   c(app = app, args = args)
 }

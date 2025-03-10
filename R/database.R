@@ -4,9 +4,71 @@
 #' @param x database (tibble), with date, var, depth
 #' @param path character, the root path for the filename
 #' @param ext character, the filename extension to apply (with dot)
-#' @return charcater vector of filenames in form
-#'         \code{<path>/YYYY/mmdd/YYYY-mm-dd_var_depth.tif}
+#' @return character vector of filenames in form
+#'         \code{<path>/YYYY/mmdd/id__datetime_depth_period_variable_treatment.ext}
 compose_filename <- function(x, path = ".", ext = ".tif"){
+  
+  # <path>/YYYY/mmdd/id__datetime_depth_period_variable_treatment.ext
+  file.path(path,
+            format(x$date, "%Y/%m%d"),
+            sprintf("%s__%s%s_%s_%s_%s_%s%s",
+                    x$id,
+                    format(x$date, "%Y-%m-%dT"), x$time,
+                    x$depth, 
+                    x$period,
+                    x$variable,
+                    x$treatment,
+                    ext))
+}
+
+#' Decompose a filename into a database
+#'
+#' @export
+#' @param x character, vector of one or more filenames
+#' @param ext character, the extension to remove (including dot)
+#' @return table (tibble) database
+decompose_filename = function(x = "copernicus__2022-01-15T000000_9.573_day_vo_raw.tif",
+                              ext = ".tif"){
+  
+  datetime = function(x = c("2022-01-15T000000", "2022-01-16T123456")){
+    list(date = as.Date(substring(x, 1,10), format = "%Y-%m-%d"),
+         time = substring(x, 12))
+  }
+  # a tidy version of gsub
+  global_sub <- function(x, pattern, replacement = ".tif", fixed = TRUE, ...){
+    gsub(pattern, replacement, x, fixed = fixed, ...)
+  }
+  x <- basename(x) |>
+    global_sub(pattern = ext, replacement = "") |>
+    strsplit(split = "__", fixed = TRUE)
+  y = sapply(x, '[[', 2) |>
+    strsplit(split = "_", fixed = TRUE)
+  #1 = datetime
+  #2 = depth
+  #3 = period
+  #4 = variable
+  #5 = treatement
+  
+  dt = datetime(sapply(y, '[[', 1))
+  dplyr::tibble(
+    id = sapply(x, '[[', 1),
+    date = dt$date,
+    time = dt$time,
+    depth = sapply(y, '[[', 2),
+    period = sapply(y, '[[', 3),
+    variable = sapply(y, '[[', 4),
+    treatment = sapply(y, '[[', 5) )
+}
+
+#' Compose a filename from a database
+#'
+#' @export
+#' @param x database (tibble), with date, var, depth
+#' @param path character, the root path for the filename
+#' @param ext character, the filename extension to apply (with dot)
+#' @return character vector of filenames in form
+#'         \code{<path>/YYYY/mmdd/YYYY-mm-dd_var_depth.tif}
+compose_filename_v0.01 <- function(x, path = ".", ext = ".tif"){
   yyyymmdd <- format(x$date, "%Y/%m%d")
   # <path>/YYYY/mmdd/YYYY-mm-dd_trt_param.tif
   file.path(path,
@@ -17,22 +79,22 @@ compose_filename <- function(x, path = ".", ext = ".tif"){
                     x$depth,
                     ext))
 }
-
 #' Decompose a filename into a database
 #'
 #' @export
 #' @param x character, vector of one or more filenames
 #' @param ext character, the extension to remove (including dot)
 #' @return table (tibble) database
-decompose_filename <- function(x = "2021-03-20_zos_sur.tif",
+decompose_filename_v0.01 <- function(x = "2021-03-20_zos_sur.tif",
                                ext = ".tif"){
 
+  
   # a tidy version of gsub
   global_sub <- function(x, pattern, replacement = ".tif", fixed = TRUE, ...){
     gsub(pattern, replacement, x, fixed = fixed, ...)
   }
-  x <- basename(x) %>%
-    global_sub(pattern = ext, replacement = "") %>%
+  x <- basename(x) |>
+    global_sub(pattern = ext, replacement = "") |>
     strsplit(split = "_", fixed = TRUE)
   # <path>/YYYY/mmdd/YYYY-mm-dd_trt_param.tif
   dplyr::tibble(
@@ -51,7 +113,7 @@ decompose_filename <- function(x = "2021-03-20_zos_sur.tif",
 build_database <- function(path, pattern = "*.tif", ...){
   if (missing(path)) stop("path is required")
   list.files(path[1], pattern = utils::glob2rx(pattern),
-             recursive = TRUE, full.names = TRUE) %>%
+             recursive = TRUE, full.names = TRUE) |>
     decompose_filename(...)
 }
 
@@ -68,7 +130,7 @@ read_database <- function(path,
   filepath <- file.path(path[1], filename[1])
   stopifnot(file.exists(filepath))
   # date var depth
-  suppressMessages(readr::read_csv(filepath, col_types = 'Dcc'))
+  suppressMessages(readr::read_csv(filepath, col_types = 'cDccccc'))
 }
 
 #' Write the file-list database
@@ -87,8 +149,8 @@ write_database <- function(x, path,
   if (missing(path)) stop("path is required")
   filepath <- file.path(path[1], filename[1])
   # date var depth
-  dummy <- x %>%
-    dplyr::select(.data$date, .data$var, .data$depth) %>%
+  dummy <- x |>
+    #dplyr::select(.data$date, .data$var, .data$depth) |>
     readr::write_csv(filepath)
   invisible(x)
 }

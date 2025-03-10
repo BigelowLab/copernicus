@@ -77,7 +77,7 @@ db <- merge_lut() |>
 #                     depth))
 # for (i in seq_along(xx)) stars::write_stars(xx[[i]], files[i], driver = "GTiff")
 # 
-# DB <- copernicus::append_database(DB, copernicus::decompose_filename(files)) %>%
+# DB <- copernicus::append_database(DB, copernicus::decompose_filename(files)) |>
 #   copernicus::write_database(OPATH)
 
 

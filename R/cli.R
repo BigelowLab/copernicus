@@ -1,3 +1,18 @@
+# A function to apply single non-fancy (or fancy) quotes
+#
+# @param x character string
+# @param fancy logical, curly quotes? (TRUE) or plain quotes (FALSE)?
+# @return single quoted value of x
+squote = function(x, fancy = FALSE){
+  on.exit({
+    options("useFancyQuotes")
+  })
+  orig_fancy = options("useFancyQuotes")
+  options(useFancyQuotes = fancy)
+  sQuote(x)
+}
+
+
 #' Build a CLI subset request 
 #' 
 #' See \href{https://help.marine.copernicus.eu/en/articles/7972861-copernicus-marine-toolbox-cli-subset#h_a906235d0a}{the docs}
@@ -15,15 +30,19 @@
 #' @return named 2 element character vector of the app and the args
 #' copernicusmarine subset -i cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m -x 5.0 -X 10.0 -y 38.0 -Y 42.0 -z 0. -Z 10. -v uo -v vo -t 2022-01-01 -T 2022-01-15 -o ./copernicus-data -f dataset_subset.nc
 build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
-                            vars = c("uo","vo"),
+                            vars = product_lut('GLOBAL_ANALYSISFORECAST_PHY_001_024') |>
+                              dplyr::filter(datasetid == dataset_id) |>
+                              dplyr::pull(.data$variables) |>
+                              unlist(),
                             bb = c(xmin = 5, ymin = 38, xmax = 10, ymax = 42),
                             depth = c(0, 10),
                             time = c("2022-01-01", "2022-01-15"),
                             ofile = "output.nc",
                             extra = "--overwrite",
                             app = get_copernicus_app()){
+
   
-  args = sprintf("subset -i %s", dataset_id[1])
+  args = sprintf("subset -i %s --log-level %s", dataset_id[1], toupper(loglevel))
   if (!is.null(vars)){
     s = paste(paste("-v", vars), collapse = " ")
     args = sprintf("%s %s", args, s)
@@ -51,7 +70,7 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
   
   if (!is.null(extra)) args = sprintf("%s %s", args, extra)
   
-  args = sprintf("%s -f %s -o %s", args, basename(ofile), dirname(ofile)) 
+  args = sprintf("%s -f %s -o %s", args, squote(basename(ofile)), squote(dirname(ofile))) 
   
   c(app = app, args = args)
 }
@@ -62,17 +81,14 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
 #' @export
 #' @param ... arguments for \code{\link{build_cli_subset}}
 #' @param verbose logical, if true pint the calling sequence excluding credentials
-#' @param credentials two element named character vector of \code{username} and \code{password}
 #' @return numeric, 0 for success
-download_copernicus_cli = function(..., verbose = FALSE, credentials = get_credentials()){
+download_copernicus_cli_subset = function(..., verbose = FALSE){
   x = build_cli_subset(...)
   if (verbose){
     s = sprintf("%s %s", x[['app']], args = x[['args']])
     cat(s, "\n")
   }
-  x[['args']] = sprintf("%s --username %s --password %s",x[['args']], 
-                      credentials[['username']],
-                      credentials[['password']])
+  x[['args']] = sprintf("%s",x[['args']])
   
   system2(x[['app']], args = x[['args']])
 }
@@ -80,22 +96,22 @@ download_copernicus_cli = function(..., verbose = FALSE, credentials = get_crede
  
 #' Fetch Copernicus data as a list of \code{stars} objects
 #'
-#' This is a wrapper around \code{\link{download_copernicus_cli}} that
+#' This is a wrapper around \code{\link{download_copernicus_cli_subset}} that
 #' hides the details and returns a list of \code{stars} objects.  The downloaded
 #' file is deleted.
 #'
 #' @export
 #' @param ofile chr, the temporary (?) outfile
-#' @inheritDotParams download_copernicus_cli
+#' @inheritDotParams download_copernicus_cli_subset
 #' @param cleanup logical, if TRUE clean up files
 #' @return named list of stars objects (organized by variable)
-fetch_copernicus_cli = function(ofile = "output.nc", 
+fetch_copernicus_cli_subset = function(ofile = "output.nc", 
                                 cleanup = TRUE,
                                 ...){
   
-  ok = download_copernicus_cli(ofile = ofile, ...)
+  ok = download_copernicus_cli_subset(ofile = ofile, ...)
   if (ok != 0){
-    message("download failed for", basename(ofile))
+    message("download failed for ", basename(ofile))
     return(NULL)
   }
   

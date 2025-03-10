@@ -6,8 +6,6 @@
 \alias{copernicus}
 \title{copernicus: Serves Center for Ocean Forecasting Copernicus needs}
 \description{
-Provides download, archiving and access to Copernicus related local datasets.
-
 Tools for working with Copernicus data.
 }
 \keyword{internal}

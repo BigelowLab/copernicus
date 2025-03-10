@@ -1,3 +1,5 @@
+
+
 #' Retrieve dimension values by name
 #'
 #' @export
@@ -60,6 +62,8 @@ get_depth <- function(x){
   }
   depth
 }
+
+
 
 #' Retrieve the time dimension values
 #'
@@ -168,8 +172,10 @@ get_loc <- function(x, what = 'time', ...){
   switch(tolower(what[1]),
          "lon" = get_lon(x),
          "lat" = get_lat(x),
+         "longitude" = get_lon(x),
+         "latitude" = get_lat(x),
          "depth" = get_depth(x),
-         'all' = sapply(c("lon", "lat", "depth", "time"),
+         'all' = sapply(names(x$dim),
                         function(w) get_loc(x, w), simplify = FALSE),
          get_time(x))
 }
@@ -191,8 +197,24 @@ get_range <- function(x, what = 'lon'){
   switch(tolower(what[1]),
          "lon" = range(get_lon(x)),
          "lat" = range(get_lat(x)),
-         "depth" = range(get_depth(x)),
-         'all' = sapply(get_loc(x, 'all'), range, simplify = FALSE),
+         "longitude" = range(get_lon(x)),
+         "latitude" = range(get_lat(x)),
+         "depth" = {
+            d = get_depth(x)
+            r = if(is.null(d)){
+               NULL
+             } else {
+               range(d) 
+             }
+            r
+          },
+         'all' = {
+           nms = names(x$dim)
+           sapply(nms, 
+                  function(nm){
+                    get_range(x, what = nm)
+                  }, simplify = FALSE)
+          },
          range(get_time(x)))
 }
 
@@ -357,7 +379,7 @@ get_var <- function(x,
                           banded = banded, form = form)
                 }, simplify = FALSE)
     if (tolower(form[1]) == 'stars'){
-      r <- Reduce(c, r) %>%
+      r <- Reduce(c, r) |>
         stats::setNames(var)
     }
     return(r)
@@ -366,20 +388,27 @@ get_var <- function(x,
   stopifnot(var[1] %in% get_varnames(x))
 
   if (!banded) {
-    depth <- depth[c(1,1)]
+    if (!is.null(depth)) depth <- depth[c(1,1)]
     time <- time[c(1,1)]
   }
 
   ilon <- loc_index(x, bb[1:2], "lon")
   ilat <- loc_index(x, bb[3:4], "lat")
-  idepth <- loc_index(x, depth, "depth")
+  idepth <- if(is.null(depth)){
+      NULL
+    } else {
+      loc_index(x, depth, "depth")
+    }
   itime <- loc_index(x, time, 'time')
 
   lons <- get_lon(x)
   lats <- get_lat(x)
   times <- get_time(x)
-  depths <- get_depth(x)
-
+  depths <-  if (is.null(depth)){
+      NULL
+    } else {
+      get_depth(x)
+    }
   dx <- lons[2]-lons[1]
   dy <- lats[2]-lats[1]
   xlim <- lons[ilon] + c(-dx, dx)/2
@@ -388,8 +417,9 @@ get_var <- function(x,
   index <- list(
     longitude = loc_index(x, bb[1:2], "lon", make_rle = TRUE),
     latitude = loc_index(x, bb[3:4], "lat", make_rle = TRUE),
-    time =  loc_index(x, time, "time", make_rle = TRUE),
-    depth = loc_index(x, depth, "depth", make_rle = TRUE))
+    time =  loc_index(x, time, "time", make_rle = TRUE))
+  
+  if (!is.null(depth)) index[['depth']] = loc_index(x, depth, "depth", make_rle = TRUE)
 
   m <- get_var_array(x, var[1], index, collapse_degen = !banded)
 
@@ -404,13 +434,13 @@ get_var <- function(x,
   #cat("var=", var[1], "\n")
   #print(d)
   time_index <- index$time[1] + (seq_len(index$time[2]) - 1)
-  depth_index <- index$depth[1] + (seq_len(index$depth[2]) - 1)
+  if (!is.null(depth)) depth_index <- index$depth[1] + (seq_len(index$depth[2]) - 1)
 
   if (!banded){
     r <- stars::st_as_stars(stbb,
                             nx = d[1],
                             ny = d[2],
-                            values = m) %>%
+                            values = m) |>
          stars::st_flip(which = 2)
   } else if (length(d) == 4){
     # lon, lat, depth, time
@@ -420,16 +450,16 @@ get_var <- function(x,
                                      nx = d[1],
                                      ny = d[2],
                                      nz = d[3],
-                                     values = m[,,,i]) %>%
-                    stars::st_flip(which = 2) %>%
+                                     values = m[,,,i]) |>
+                    stars::st_flip(which = 2) |>
                     stars::st_set_dimensions(which = 3,
                                              names = 'depth',
                                              values = depths[depth_index])
                 })
     if (length(r) > 1){
-      r <- r %>%
-        twinkle::bind_attrs(nms= format(times[itime], "%Y%m%dT%H%M%S")) %>%
-        merge(name = 'time') %>%
+      r <- r |>
+        twinkle::bind_attrs() |> #nms= format(times[itime], "%Y%m%dT%H%M%S")) |>
+        merge(name = 'time') |>
         stars::st_set_dimensions(which = 4,
                                  names = 'time',
                                  values = times[time_index])
@@ -443,8 +473,8 @@ get_var <- function(x,
                             nx = d[1],
                             ny = d[2],
                             nz = d[3],
-                            values = m) %>%
-      stars::st_flip(which = 2)  %>%
+                            values = m) |>
+      stars::st_flip(which = 2)  |>
       stars::st_set_dimensions(which = 3,
                                values = times[time_index],
                                names = 'time')
@@ -454,32 +484,11 @@ get_var <- function(x,
                             nx = d[1],
                             ny = d[2],
                             nz = 1,
-                            values = m) %>%
-      stars::st_flip(which = 2) %>%
+                            values = m) |>
+      stars::st_flip(which = 2) |>
       stars::st_set_dimensions(which = 3,
                                values = times[time_index],
                                names = 'time')
   }
   stats::setNames(r, var)
 }
-
-
-#' Open a copernicus connection given a product id
-#' 
-#' @export
-#' @param product_id char, the product identifer
-#' @param credentials NULL or character vector 
-#' @param base_uri char base UIR for opendap
-#' @return ncdf4 object
-open_nc = function(product_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
-                   credentials = get_credentials(),
-                   base_uri = "https://nrt.cmems-du.eu/thredds/dodsC"){
-  
-  creds = paste0(credentials[[1]], ":", credentials[[2]], "@")
-  uri = file.path(gsub("https://", paste0("https://", creds), base_uri, fixed = TRUE),
-                  product_id)
-  ncdf4::nc_open(uri)
-}
-
-
-

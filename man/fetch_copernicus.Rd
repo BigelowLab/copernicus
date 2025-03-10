@@ -4,16 +4,18 @@
 \alias{fetch_copernicus}
 \title{Retrieve a stars array of Copernicus data}
 \usage{
-fetch_copernicus(use = c("cli", "script")[1], ...)
+fetch_copernicus(use = c("cli", "script")[1], bind = TRUE, ...)
 }
 \arguments{
 \item{use}{char, download method one of 'cli' or 'script' (deprecated)}
 
+\item{bind}{logical, if TRUE bind the elements of the returned into a single 
+multi-attribute stars object.}
+
 \item{...}{
-  Arguments passed on to \code{\link[=download_copernicus_cli]{download_copernicus_cli}}
+  Arguments passed on to \code{\link[=download_copernicus_cli_subset]{download_copernicus_cli_subset}}
   \describe{
     \item{\code{verbose}}{logical, if true pint the calling sequence excluding credentials}
-    \item{\code{credentials}}{two element named character vector of \code{username} and \code{password}}
   }}
 }
 \description{

@@ -4,7 +4,7 @@
 \alias{unpack_copernicus}
 \title{Unpack a copernicus ncdf4 file}
 \usage{
-unpack_copernicus(filename, banded = FALSE)
+unpack_copernicus(filename, banded = TRUE)
 }
 \arguments{
 \item{filename}{character, the full path specification}

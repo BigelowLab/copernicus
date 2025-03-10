@@ -6,7 +6,9 @@
 \usage{
 build_cli_subset(
   dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
-  vars = c("uo", "vo"),
+  vars =
+    unlist(dplyr::pull(dplyr::filter(product_lut("GLOBAL_ANALYSISFORECAST_PHY_001_024"),
+    datasetid == dataset_id), .data$variables)),
   bb = c(xmin = 5, ymin = 38, xmax = 10, ymax = 42),
   depth = c(0, 10),
   time = c("2022-01-01", "2022-01-15"),

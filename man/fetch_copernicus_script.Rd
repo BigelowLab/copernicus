@@ -27,7 +27,7 @@ fetch_copernicus_script(
 named list of stars objects (organized by variable)
 }
 \description{
-This is a wrapper around \code{\link{download_copernicus}} that
+This is a wrapper around \code{\link{download_copernicus_script}} that
 hides the details and returns a list of \code{stars} objects.  The downloaded
 file is deleted.
 }

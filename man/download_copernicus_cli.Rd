@@ -2,7 +2,7 @@
 % Please edit documentation in R/cli.R
 \name{download_copernicus_cli}
 \alias{download_copernicus_cli}
-\title{Fetch via copernicus-marine subset}
+\title{Fetch via copernicusmarine subset}
 \usage{
 download_copernicus_cli(..., verbose = FALSE, credentials = get_credentials())
 }
@@ -17,5 +17,5 @@ download_copernicus_cli(..., verbose = FALSE, credentials = get_credentials())
 numeric, 0 for success
 }
 \description{
-Fetch via copernicus-marine subset
+Fetch via copernicusmarine subset
 }

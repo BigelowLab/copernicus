@@ -86,3 +86,34 @@ make_path <- function(path, recursive = TRUE, ...){
   }
   ok
 }
+
+
+#' Write `copernicusmarine` app path to a file
+#'
+#' @export
+#' @param x char, the path to the `copernicusmarine` app
+#' @param filename the name the file to store the path as a single line of text
+#' @return NULL invisibly
+set_copernicus_app <- function(x = "copernicusmarine",
+                            filename = "~/.copernicusapp"){
+  cat(x[1], sep = "\n", file = filename)
+  invisible(NULL)
+}
+
+
+#' Retrieve `copernicusmarine` app  
+#'
+#' @export
+#' @param filename the name the file
+#' @return chr the known app (with path)
+get_copernicus_app <- function(x = "copernicusmarine",
+                               filename = "~/.copernicusapp"){
+  if (!file.exists(filename[1])){
+    warning("credentials file not found:", filename[1])
+    app = "copernicusmarine"
+  } else {
+    app = readLines(filename[1])
+  }
+  app
+}
+

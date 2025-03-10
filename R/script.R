@@ -94,7 +94,7 @@ download_copernicus_script <- function(x = populate_script()){
 
 #' Fetch Copernicus data as a list of \code{stars} objects
 #'
-#' This is a wrapper around \code{\link{download_copernicus}} that
+#' This is a wrapper around \code{\link{download_copernicus_script}} that
 #' hides the details and returns a list of \code{stars} objects.  The downloaded
 #' file is deleted.
 #'

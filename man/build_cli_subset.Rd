@@ -11,8 +11,8 @@ build_cli_subset(
   depth = c(0, 10),
   time = c("2022-01-01", "2022-01-15"),
   ofile = "output.nc",
-  extra = "--force-download  --overwrite",
-  app = "copernicus-marine"
+  extra = "--overwrite",
+  app = get_copernicus_app()
 )
 }
 \arguments{
@@ -29,13 +29,13 @@ a 4 element named vector with "xmin", "xmax", "ymin" and "ymax" named elements}
 
 \item{ofile}{char, the output filename (default is "./output.nc")}
 
-\item{extra}{NULL or character, any other arguments for \code{copernicus-marine subset}}
+\item{extra}{NULL or character, any other arguments for \code{copernicusmarine subset}}
 
-\item{app}{char, the name of the application to run (default is "copernicus-marine")}
+\item{app}{char, the name of the application to run (default is "copernicusmarine")}
 }
 \value{
 named 2 element character vector of the app and the args
-copernicus-marine subset -i cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m -x 5.0 -X 10.0 -y 38.0 -Y 42.0 -z 0. -Z 10. -v uo -v vo -t 2022-01-01 -T 2022-01-15 -o ./copernicus-data -f dataset_subset.nc
+copernicusmarine subset -i cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m -x 5.0 -X 10.0 -y 38.0 -Y 42.0 -z 0. -Z 10. -v uo -v vo -t 2022-01-01 -T 2022-01-15 -o ./copernicus-data -f dataset_subset.nc
 }
 \description{
 See \href{https://help.marine.copernicus.eu/en/articles/7972861-copernicus-marine-toolbox-cli-subset#h_a906235d0a}{the docs}

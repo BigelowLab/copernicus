@@ -11,6 +11,7 @@ knitr::opts_chunk$set(echo = TRUE)
 
 Provides download, archiving and access to [Copernicus](https://marine.copernicus.eu/) marine local datasets using R language.
 
+
 ### Requirements
 
   + [R v4+](https://www.r-project.org/)
@@ -38,7 +39,7 @@ You can preconfigure a credentials file (required) and a path definition file (o
 
 You must have credentials to access Copernicus holdings - if you don't have them now please request access [here](https://data.marine.copernicus.eu/register). 
 
-Once you have them you can add them to a file hidden in your home directory. The functions in this package the require the credentials know where to look for them.  We don't actually run this in the README, but you can copy-and-paste to use in R.
+Once you have them you can add them to a file hidden in your home directory. The functions in this package the require the credentials know where to look for them.  We don't actually run this in the README, but you can copy-and-paste to use in R.  Obviously you would supply your own `username:password` values.
 
 ```
 library(copernicus)
@@ -52,6 +53,27 @@ If you plan to use our directory-driven database storage system then you should 
 ```
 set_root_path("/the/path/to/copernicus/data")
 ```
+
+#### Configure the application path
+
+If you are using R within a RStudio session, you may encounter issues where `system()` and `system2()` cant find the `copernicusmarine` application. This is not the case when you run R outside of the RStudio context. Technically, this is a environmental path issue, which you can remedy by providing the full path specification for the `app` argument to the function `build_cli_subset()`.  By default, `app = 'copernicusmarine`, but you may need to include the full path specification.  We provide a mechanism for storing this path in a configuration file once, and then it will work without issue in subsequent sessions of R. Here's how we set ours. 
+
+First determine the app path in the terminal session (outside of RStudio context)
+```
+$ which copernicusmarine
+/opt/copernicus/bin/copernicusmarine
+```
+Then set the path.
+```{r}
+set_copernicus_app(`/opt/copernicus/bin/copernicusmarine`)
+```
+
+This is optional (but worth it if you operate within RStudio). You can retrieve the application path with `get_copernicus_app()`, which defaults to `copernicusmarine` if you didn't set the path.
+
+```{r}
+get_copernicus_app()
+```
+
 
 
 ## Downloading data

@@ -6,15 +6,22 @@
 # save by slice var <prod>/nwa/yyyy/mmdd/date_var_depth.tif
 # append database and write
 
-library(copernicus)
-library(stars)
-library(dplyr)
+suppressPackageStartupMessages({
+  library(charlier)
+  library(copernicus)
+  library(stars)
+  library(dplyr)
+})
+
+charlier::start_logger(copernicus::copernicus_path("log"))
 
 date <- commandArgs(trailingOnly = TRUE)[1]
 if (is.na(date) || length(date) == 0) {
   date <- Sys.Date()
 }
 date <- as.Date(date)
+
+charlier::info("fetch_day: %s", format(date, "%Y-%m-%d"))
 
 OPATH <- copernicus::copernicus_path("global-analysis-forecast-phy-001-024/nwa")
 DB <- copernicus::read_database(OPATH)

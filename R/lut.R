@@ -1,9 +1,9 @@
 #' Read a product LUT
 #' 
 #' @export
-#' @param productid cahr, the product indentifier
+#' @param productid char, the product identifier
 #' @return tibble
-product_lut = function(productid = 'GLOBAL_ANALYSISFORECAST_PHY_001_024'){
+product_lut = function(productid = 'global-analysis-forecast-phy-001-024'){
   
   filename = system.file(file.path("lut", paste0(productid, ".csv")), package = "copernicus")
   readr::read_csv(filename, show_col_types = FALSE) |>

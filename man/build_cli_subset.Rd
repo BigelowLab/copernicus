@@ -6,19 +6,22 @@
 \usage{
 build_cli_subset(
   dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
-  vars =
-    unlist(dplyr::pull(dplyr::filter(product_lut("GLOBAL_ANALYSISFORECAST_PHY_001_024"),
-    datasetid == dataset_id), .data$variables)),
+  product = "global-analysis-forecast-phy-001-024",
+  vars = unlist(dplyr::pull(dplyr::filter(product_lut(product[1]), datasetid ==
+    dataset_id), .data$variables)),
   bb = c(xmin = 5, ymin = 38, xmax = 10, ymax = 42),
   depth = c(0, 10),
   time = c("2022-01-01", "2022-01-15"),
   ofile = "output.nc",
   extra = "--overwrite",
-  app = get_copernicus_app()
+  app = get_copernicus_app(),
+  log_level = "INFO"
 )
 }
 \arguments{
 \item{dataset_id}{char, the data set identifier such as 'cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m'}
+
+\item{product}{chr the product family such as "global-analysis-forecast-phy-001-024"}
 
 \item{vars}{char, a vector of one or more variables such as c("uo", "vo")}
 

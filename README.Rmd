@@ -16,15 +16,15 @@ In 2023/2024 Copernicus migrated to a new service model; learn more [here](https
 
 The toolbox is under active development, so if you are having troubles (like we have sometimes!) try reinstalling.  We have some notes [here](https://github.com/BigelowLab/copernicus/wiki/Installation-of-%60copernicusmarine%60).
 
-## Copernicus resources
+# Copernicus resources
 
 Copernicus serves **so many** data resources; finding what you want can be a challenge.  Check out the new [Marine Data Store](https://marine.copernicus.eu/news/introducing-new-copernicus-marine-data-store). And checkout the listing [here](https://marine.copernicus.eu/about/producers).
 
-### The all important datasetID
+## The all important datasetID
 
 Like data offerings from [OBPG](https://oceancolor.gsfc.nasa.gov/), Copernicus strives to provided consistent dataset identifiers that are easily decoded programmatically (and with practice by eye). In order to download programmatically you must have the datasetID in hand. Learn more about Copernicus [nomenclature rules here](https://help.marine.copernicus.eu/en/articles/6820094-how-is-defined-the-nomenclature-of-copernicus-marine-data#h_34a5a6f21d).
 
-### `get` or `subset`
+## `get` or `subset`
 
 The [Copernicus Marine Toolbox](https://help.marine.copernicus.eu/en/collections/4060068-copernicus-marine-toolbox) command-line application, `copernicus-marine` provides two primary methods for donwloading data: `get` and `subset`. `get` is not well documented, but subset does what it implies - subsetting resources by variable, spatial bounding box and time.  This package only supports `subset`.
 
@@ -63,27 +63,54 @@ Once you have them you can add them to a file hidden in your home directory. The
 If you plan to use our directory-driven database storage system then you should set the root path for the data directory.  You can always change or override it, but, like credentials, storing this path in a hidden file will ease subsequent use of the functions. We don't actually run this in the README, but you can copy-and-paste to use in R.  Again, replace the path with one suiting your own situation.
 
 ```
-set_root_path("/the/path/to/copernicus/data")
+copernicus::set_root_path("/the/path/to/copernicus/data")
 ```
 
 #### Configure the application path
 
 If you are using R within a RStudio session, you may encounter issues where `system()` and `system2()` cant find the `copernicusmarine` application. This is not the case when you run R outside of the RStudio context. Technically, this is a environmental path issue, which you can remedy by providing the full path specification for the `app` argument to the function `build_cli_subset()`.  By default, `app = 'copernicusmarine`, but you may need to include the full path specification.  We provide a mechanism for storing this path in a configuration file once, and then it will work without issue in subsequent sessions of R. Here's how we set ours. 
 
-First determine the app path in the terminal session (outside of RStudio context)
+First determine the app path in the terminal session (outside of RStudio context).
+
 ```
 $ which copernicusmarine
 /opt/copernicus/bin/copernicusmarine
 ```
+
 Then set the path.
 ```{r}
-set_copernicus_app(`/opt/copernicus/bin/copernicusmarine`)
+copernicus::set_copernicus_app("/opt/copernicus/bin/copernicusmarine")
 ```
 
 This is optional (but worth it if you operate within RStudio). You can retrieve the application path with `get_copernicus_app()`, which defaults to `copernicusmarine` if you didn't set the path.
 
 ```{r}
-get_copernicus_app()
+copernicus::get_copernicus_app()
+```
+
+## Product catalog
+
+You can download a product catalog for local storage.
+
+```
+ok = copernicus::fetch_product_catalog()
+```
+
+This downloads into a "catalogs" drectory within your data directory Now read it in.
+
+```{r read_catalog}
+x = copernicus::read_product_catalog()
+kableExtra::kbl(x) |>
+  kableExtra::kable_styling(fixed_thead = TRUE, 
+                            bootstrap_options = c("striped", "hover")) |>
+  kableExtra::scroll_box(width = "100%", height = "200px")
+```
+
+This provides a table of available datasets along with tables of variables for each (if any).  For example, the first row has the following variables table.
+
+```{r variable_table}
+dplyr::slice(x, 1) |>
+  dplyr::pull(dplyr::all_of(vars))
 ```
 
 ## Fetching data
@@ -153,7 +180,7 @@ db = archive_copernicus(x, path = path, id = 'cmems_mod_glo_phy-cur_anfc_0.083de
   dplyr::glimpse()
 ```
 
-Since this is the first time you uhave downloaded and archived data, be sure to save the database.
+Since this is the first time you have downloaded and archived data, be sure to save the database.
 
 ```{r write_database}
 write_database(db, path)

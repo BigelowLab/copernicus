@@ -1,9 +1,0 @@
-region: nwa
-product: global-analysis-forecast-phy-001-024
-dataset_id: cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m
-vars: 
-  - vo
-  - uo
-depth:
-  - 0
-  - 10

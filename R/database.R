@@ -1,33 +1,65 @@
-#' Compose a filename from a database
+#' Compose a file name from a database
 #'
 #' @export
 #' @param x database (tibble), with date, var, depth
-#' @param path character, the root path for the filename
-#' @param ext character, the filename extension to apply (with dot)
-#' @return character vector of filenames in form
+#' @param path character, the root path for the file name
+#' @param ext character, the file name extension to apply (including dot)
+#' @return character vector of file names in form
 #'         \code{<path>/YYYY/mmdd/id__datetime_depth_period_variable_treatment.ext}
 compose_filename <- function(x, path = ".", ext = ".tif"){
   
   # <path>/YYYY/mmdd/id__datetime_depth_period_variable_treatment.ext
   file.path(path,
             format(x$date, "%Y/%m%d"),
-            sprintf("%s__%s%s_%s_%s_%s_%s%s",
-                    x$id,
-                    format(x$date, "%Y-%m-%dT"), x$time,
-                    x$depth, 
+            sprintf("%s_%s_%s_%s_%s%s",
+                    format(x$date, "%Y-%m-%d"), 
                     x$period,
-                    x$variable,
+                    x$var,
+                    x$depth, 
                     x$treatment,
                     ext))
 }
 
-#' Decompose a filename into a database
+#' Decompose a file name into a database
 #'
 #' @export
+#' @param x character, vector of one or more file names
+#' @param ext character, the extension to remove (including dot)
+#' @return table (tibble) database
+decompose_filename = function(x = c("2025-03-17_day_uo_sur_none.tif",
+                                      "2019-01-01_day_mlotst_sur_none.tif"),
+                                  ext = ".tif"){
+  
+  # a tidy version of gsub
+  global_sub <- function(x, pattern, replacement = ".tif", fixed = TRUE, ...){
+    gsub(pattern, replacement, x, fixed = fixed, ...)
+  }
+  x <- basename(x) |>
+    global_sub(pattern = ext, replacement = "") |>
+    strsplit(split = "_", fixed = TRUE)
+  #1 = date
+  #2 = period
+  #3 = var
+  #4 = depth
+  #5 = treatment
+
+  dplyr::tibble(
+    date = sapply(x, '[[', 1),
+    period = sapply(x, '[[', 2),
+    var = sapply(x, '[[', 3),
+    depth = sapply(x, '[[', 4),
+    treatment = sapply(x, '[[', 5) )
+}
+
+
+
+#' Decompose a filename into a database
+#'
 #' @param x character, vector of one or more filenames
 #' @param ext character, the extension to remove (including dot)
 #' @return table (tibble) database
-decompose_filename = function(x = "copernicus__2022-01-15T000000_9.573_day_vo_raw.tif",
+decompose_filename_pre_v2 = function(x = c("2025-03-17_day_uo_sur_none.tif",
+                                    "2019-01-01_day_mlotst_sur_none.tif"),
                               ext = ".tif"){
   
   datetime = function(x = c("2022-01-15T000000", "2022-01-16T123456")){
@@ -62,7 +94,6 @@ decompose_filename = function(x = "copernicus__2022-01-15T000000_9.573_day_vo_ra
 
 #' Compose a filename from a database
 #'
-#' @export
 #' @param x database (tibble), with date, var, depth
 #' @param path character, the root path for the filename
 #' @param ext character, the filename extension to apply (with dot)
@@ -81,7 +112,6 @@ compose_filename_v0.01 <- function(x, path = ".", ext = ".tif"){
 }
 #' Decompose a filename into a database
 #'
-#' @export
 #' @param x character, vector of one or more filenames
 #' @param ext character, the extension to remove (including dot)
 #' @return table (tibble) database
@@ -108,13 +138,17 @@ decompose_filename_v0.01 <- function(x = "2021-03-20_zos_sur.tif",
 #' @export
 #' @param path character the directory to catalog
 #' @param pattern character, the filename pattern (as glob) to search for
+#' @param save_db logical, if TRUE save the database via [write_database]
 #' @param ... other arguments for \code{\link{decompose_filename}}
 #' @return tibble database
-build_database <- function(path, pattern = "*.tif", ...){
+build_database <- function(path, pattern = "*.tif", 
+                           save_db = FALSE, ...){
   if (missing(path)) stop("path is required")
-  list.files(path[1], pattern = utils::glob2rx(pattern),
+  db = list.files(path[1], pattern = utils::glob2rx(pattern),
              recursive = TRUE, full.names = TRUE) |>
     decompose_filename(...)
+  if (save_db) db = write_database(db, path)
+  return(db)
 }
 
 
@@ -130,7 +164,7 @@ read_database <- function(path,
   filepath <- file.path(path[1], filename[1])
   stopifnot(file.exists(filepath))
   # date var depth
-  suppressMessages(readr::read_csv(filepath, col_types = 'cDccccc'))
+  suppressMessages(readr::read_csv(filepath, col_types = 'Dcccc'))
 }
 
 #' Write the file-list database
@@ -180,4 +214,20 @@ append_database <- function(db, x, rm_dups = TRUE){
   }
 
   db
+}
+
+
+#' Given a database (days, 8DR or month), determine the times
+#' that are missing between the first and last records
+#' 
+#' @export
+#' @param x a database - typically filtered to just a single period
+#' @param by chr, unit of time used for creating sequence to match against
+#' @return Date dates that seem to be missing
+missing_records = function(x, 
+                           by = dplyr::slice(x,1) |> 
+                             dplyr::pull(dplyr::all_of("period"))){
+  dr = range(x$date)
+  dd = seq(from = dr[1], to = dr[2], by = by)
+  dd[!(dd %in% x$date)]
 }

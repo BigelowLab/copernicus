@@ -19,6 +19,7 @@ squote = function(x, fancy = FALSE){
 #' 
 #' @export
 #' @param dataset_id char, the data set identifier such as 'cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m'
+#' @param product chr the product family such as "global-analysis-forecast-phy-001-024"
 #' @param vars char, a vector of one or more variables such as c("uo", "vo")
 #' @param bb \code{\link[sf]{bbox}} or named numeric vector, either a \code{\link[sf]{bbox}} or 
 #'    a 4 element named vector with "xmin", "xmax", "ymin" and "ymax" named elements
@@ -30,7 +31,8 @@ squote = function(x, fancy = FALSE){
 #' @return named 2 element character vector of the app and the args
 #' copernicusmarine subset -i cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m -x 5.0 -X 10.0 -y 38.0 -Y 42.0 -z 0. -Z 10. -v uo -v vo -t 2022-01-01 -T 2022-01-15 -o ./copernicus-data -f dataset_subset.nc
 build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
-                            vars = product_lut('GLOBAL_ANALYSISFORECAST_PHY_001_024') |>
+                            product = "global-analysis-forecast-phy-001-024",
+                            vars = product_lut(product[1]) |>
                               dplyr::filter(datasetid == dataset_id) |>
                               dplyr::pull(.data$variables) |>
                               unlist(),
@@ -39,10 +41,11 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
                             time = c("2022-01-01", "2022-01-15"),
                             ofile = "output.nc",
                             extra = "--overwrite",
-                            app = get_copernicus_app()){
+                            app = get_copernicus_app(),
+                            log_level = "INFO"){
 
   
-  args = sprintf("subset -i %s --log-level %s", dataset_id[1], toupper(loglevel))
+  args = sprintf("subset -i %s --log-level %s", dataset_id[1], toupper(log_level))
   if (!is.null(vars)){
     s = paste(paste("-v", vars), collapse = " ")
     args = sprintf("%s %s", args, s)

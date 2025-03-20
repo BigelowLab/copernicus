@@ -4,10 +4,10 @@
 \alias{product_lut}
 \title{Read a product LUT}
 \usage{
-product_lut(productid = "global-analysis-forecast-phy-001-024")
+product_lut(product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_024")
 }
 \arguments{
-\item{productid}{char, the product identifier}
+\item{product_id}{char, the product identifier}
 }
 \value{
 tibble

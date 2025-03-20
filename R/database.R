@@ -8,49 +8,19 @@
 #'         \code{<path>/YYYY/mmdd/id__datetime_depth_period_variable_treatment.ext}
 compose_filename <- function(x, path = ".", ext = ".tif"){
   
-  # <path>/YYYY/mmdd/id__datetime_depth_period_variable_treatment.ext
+  # <path>/YYYY/mmdd/id__date_time_depth_period_variable_treatment.ext
+  # cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-03-14T000000_0.494_day_vo_raw.tif
   file.path(path,
             format(x$date, "%Y/%m%d"),
-            sprintf("%s_%s_%s_%s_%s%s",
-                    format(x$date, "%Y-%m-%d"), 
-                    x$period,
-                    x$var,
+            sprintf("%s__%s_%s_%s_%s_%s%s",
+                    x$id,
+                    sprintf("%sT%s", format(x$date, "%Y-%m-%d"), x$time),
                     x$depth, 
+                    x$period,
+                    x$variable,
                     x$treatment,
                     ext))
 }
-
-#' Decompose a file name into a database
-#'
-#' @export
-#' @param x character, vector of one or more file names
-#' @param ext character, the extension to remove (including dot)
-#' @return table (tibble) database
-decompose_filename = function(x = c("2025-03-17_day_uo_sur_none.tif",
-                                      "2019-01-01_day_mlotst_sur_none.tif"),
-                                  ext = ".tif"){
-  
-  # a tidy version of gsub
-  global_sub <- function(x, pattern, replacement = ".tif", fixed = TRUE, ...){
-    gsub(pattern, replacement, x, fixed = fixed, ...)
-  }
-  x <- basename(x) |>
-    global_sub(pattern = ext, replacement = "") |>
-    strsplit(split = "_", fixed = TRUE)
-  #1 = date
-  #2 = period
-  #3 = var
-  #4 = depth
-  #5 = treatment
-
-  dplyr::tibble(
-    date = sapply(x, '[[', 1),
-    period = sapply(x, '[[', 2),
-    var = sapply(x, '[[', 3),
-    depth = sapply(x, '[[', 4),
-    treatment = sapply(x, '[[', 5) )
-}
-
 
 
 #' Decompose a filename into a database
@@ -58,9 +28,18 @@ decompose_filename = function(x = c("2025-03-17_day_uo_sur_none.tif",
 #' @param x character, vector of one or more filenames
 #' @param ext character, the extension to remove (including dot)
 #' @return table (tibble) database
-decompose_filename_pre_v2 = function(x = c("2025-03-17_day_uo_sur_none.tif",
-                                    "2019-01-01_day_mlotst_sur_none.tif"),
-                              ext = ".tif"){
+#' \itemize{
+#'  \item{id chr, the dataset_id}
+#'  \item{date Date}
+#'  \item{time, chr, six-character HHMMSS}
+#'  \item{depth chr, the depth in meters}
+#'  \item{period chr, one of day, month, etc}
+#'  \item{variable chr, the variable name}
+#'  \item{treatment chr, treatment such as raw, mean, sum, etc}
+#' }
+decompose_filename = function(x = c("cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-03-18T000000_sur_day_uo_raw.tif", 
+                                            "cmems_mod_glo_phy_anfc_0.083deg_P1D-m__2025-03-18T000000_sur_day_zos_raw.tif"),
+                                     ext = ".tif"){
   
   datetime = function(x = c("2022-01-15T000000", "2022-01-16T123456")){
     list(date = as.Date(substring(x, 1,10), format = "%Y-%m-%d"),
@@ -75,11 +54,12 @@ decompose_filename_pre_v2 = function(x = c("2025-03-17_day_uo_sur_none.tif",
     strsplit(split = "__", fixed = TRUE)
   y = sapply(x, '[[', 2) |>
     strsplit(split = "_", fixed = TRUE)
-  #1 = datetime
-  #2 = depth
-  #3 = period
-  #4 = variable
-  #5 = treatement
+  #1 = date
+  #2 = time
+  #3 = depth
+  #4 = period
+  #5 = variable
+  #6 = treatment
   
   dt = datetime(sapply(y, '[[', 1))
   dplyr::tibble(
@@ -90,47 +70,6 @@ decompose_filename_pre_v2 = function(x = c("2025-03-17_day_uo_sur_none.tif",
     period = sapply(y, '[[', 3),
     variable = sapply(y, '[[', 4),
     treatment = sapply(y, '[[', 5) )
-}
-
-#' Compose a filename from a database
-#'
-#' @param x database (tibble), with date, var, depth
-#' @param path character, the root path for the filename
-#' @param ext character, the filename extension to apply (with dot)
-#' @return character vector of filenames in form
-#'         \code{<path>/YYYY/mmdd/YYYY-mm-dd_var_depth.tif}
-compose_filename_v0.01 <- function(x, path = ".", ext = ".tif"){
-  yyyymmdd <- format(x$date, "%Y/%m%d")
-  # <path>/YYYY/mmdd/YYYY-mm-dd_trt_param.tif
-  file.path(path,
-            format(x$date, "%Y/%m%d"),
-            sprintf("%s_%s_%s%s",
-                    format(x$date, "%Y-%m-%d"),
-                    x$var,
-                    x$depth,
-                    ext))
-}
-#' Decompose a filename into a database
-#'
-#' @param x character, vector of one or more filenames
-#' @param ext character, the extension to remove (including dot)
-#' @return table (tibble) database
-decompose_filename_v0.01 <- function(x = "2021-03-20_zos_sur.tif",
-                               ext = ".tif"){
-
-  
-  # a tidy version of gsub
-  global_sub <- function(x, pattern, replacement = ".tif", fixed = TRUE, ...){
-    gsub(pattern, replacement, x, fixed = fixed, ...)
-  }
-  x <- basename(x) |>
-    global_sub(pattern = ext, replacement = "") |>
-    strsplit(split = "_", fixed = TRUE)
-  # <path>/YYYY/mmdd/YYYY-mm-dd_trt_param.tif
-  dplyr::tibble(
-    date = as.Date(sapply(x, '[[', 1), format = "%Y-%m-%d"),
-    var = sapply(x, '[[', 2),
-    depth = sapply(x, '[[', 3))
 }
 
 #' Construct a database tibble give a data path

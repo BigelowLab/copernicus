@@ -29,17 +29,30 @@ suppressPackageStartupMessages({
   library(yaml)
 })
 
-fetch_one <- function(date, dataset_id, cfg = NULL, out_path = NULL){
-  dataset_id = dataset_id[1]
+# Fetch one suite of forecasts (multiple vars, multiple depths, multiple times for 
+# one dataset)
+# @param date the date to fetch
+# @param group the name of the cofuguration grop ("currents", "surface", "bottom", etc)
+# @param cfg the configuration list
+# @param out_path output path
+# @param ahead number of days ahead to retrieve
+fetch_one <- function(date, group,
+                      cfg = NULL, 
+                      out_path = NULL,
+                      ahead = 9){
+  
+  dataset_id = cfg$dataset[[group]]$dataset_id[1]
   charlier::info("fetching %s on %s", dataset_id, format(date, "%Y-%m-%d"))
   
   xx <- copernicus::fetch_copernicus(dataset_id = dataset_id,
-                                     vars = cfg$dataset[[dataset_id]][["vars"]],
-                                     time = c(date, date + 1),
+                                     vars = cfg$dataset[[group]][["vars"]],
+                                     time = c(date, date + ahead),
                                      bb = cfg$bb,
-                                     depth = cfg$dataset[[dataset_id]][["depth"]],
+                                     depth = cfg$dataset[[group]][["depth"]],
                                      log_level = cfg$log_level,
                                      verbose = TRUE)
+  ff = generate_filename(xx, id = dataset_id)
+  
   depth <- rep("sur", length(xx))
   ix <- grepl("bottom", names(xx), fixed = TRUE)
   depth[ix] <- "bot"
@@ -70,15 +83,15 @@ main = function(date = Sys.Date(), cfg = NULL){
   if (!inherits(date, "Date")) date = as.Date(date)
   
   dates <- date + c(0,seq_len(9))
-
-  dataset <- file.path(cfg$product, cfg$region)
-  out_path <- copernicus::copernicus_path(dataset)
   
-  charlier::info("fetch_forecast: %s", dataset)
+  P = copernicus::product_lut(cfg$product)
+
+  out_path <- copernicus::copernicus_path(cfg$product, cfg$region)
+  
   ff <- lapply(seq_along(dates), function(idate) {
       sapply(names(cfg$dataset), 
-        function(dataset_id){
-          fetch_one(dates[idate], dataset_id, cfg = cfg, out_path = out_path)
+        function(what){
+          fetch_one(dates[idate], what, cfg$dataset[[what]]$dataset_id, cfg = cfg, out_path = out_path)
         }) |>
        unlist()
       })
@@ -98,7 +111,7 @@ Args = argparser::arg_parser("Fetch a copernicus forecast",
                              hide.opts = TRUE) |>
   add_argument("--date",
                help = "the date of the forecast",
-               default = format(Sys.Date(), "%Y-%m-%d"),
+               default = format(Sys.Date() - 1, "%Y-%m-%d"),
                type = "charcacter") |>
   add_argument("--config",
                help = 'configuration file',

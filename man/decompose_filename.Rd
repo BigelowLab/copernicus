@@ -2,21 +2,32 @@
 % Please edit documentation in R/database.R
 \name{decompose_filename}
 \alias{decompose_filename}
-\title{Decompose a file name into a database}
+\title{Decompose a filename into a database}
 \usage{
 decompose_filename(
-  x = c("2025-03-17_day_uo_sur_none.tif", "2019-01-01_day_mlotst_sur_none.tif"),
+  x =
+    c("cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-03-18T000000_sur_day_uo_raw.tif",
+    "cmems_mod_glo_phy_anfc_0.083deg_P1D-m__2025-03-18T000000_sur_day_zos_raw.tif"),
   ext = ".tif"
 )
 }
 \arguments{
-\item{x}{character, vector of one or more file names}
+\item{x}{character, vector of one or more filenames}
 
 \item{ext}{character, the extension to remove (including dot)}
 }
 \value{
 table (tibble) database
+\itemize{
+ \item{id chr, the dataset_id}
+ \item{date Date}
+ \item{time, chr, six-character HHMMSS}
+ \item{depth chr, the depth in meters}
+ \item{period chr, one of day, month, etc}
+ \item{variable chr, the variable name}
+ \item{treatment chr, treatment such as raw, mean, sum, etc}
+}
 }
 \description{
-Decompose a file name into a database
+Decompose a filename into a database
 }

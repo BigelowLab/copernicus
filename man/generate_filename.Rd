@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{generate_filename}
 \alias{generate_filename}
-\title{Generate one or more filenames for the data}
+\title{Generate one or more file names for the data}
 \usage{
 generate_filename(
   x,
@@ -30,8 +30,11 @@ generate_filename(
 \item{ext}{char, the file extension of NULL to skip}
 }
 \description{
-Filenames have the form of "id__datetime_depth_period_variable_treatment.ext"
+File names have the form of "id__datetime_depth_period_variable_treatment.ext"
 Note the double underscore which permits parsing of the id if needed. Multiples
 are ordered by first time, then variable and finally depth Presumably, period,
 if known, is repeated
+}
+\details{
+The pattern is datasetid__time_depth_period_var_treatment.ext
 }

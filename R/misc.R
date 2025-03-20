@@ -12,7 +12,7 @@ time_as_string = function(x){
   x
 }
 
-#' Bind a list of stars objectys into a multi-attribute stars object
+#' Bind a list of stars objects into a multi-attribute stars object
 #' 
 #' @export
 #' @param x list of stars objects
@@ -20,43 +20,46 @@ time_as_string = function(x){
 bind_stars = function(x){
   do.call(c, append(x, list(along = NA_integer_)))
 }
-
 #' Guess the time interval
 #' 
 #' @export
 #' @param x ncdf4 object or stars object
 #' @param dimname char the time-dependent dimension name
-#' @return character string such as "day", "mon", "year" or NA
+#' @return character string such as "day", "mon", "year" or "secs"
 guess_period = function(x, dimname = "time"){
   
-  r = NA_character_
   dm = dimname[1]
   
   if (inherits(x, 'stars')){
-    d = stars::st_dimensions(x)
-    if (is.null(d[[dm]])) return(r)
-    delta = d[[dm]]$delta
-    if (is.na(delta)) return(r)
+    delta = stars::st_get_dimension_values(x, dm)
+    if (is.null(delta)) {
+      return("unk")
+    } else {
+      delta = diff(delta)
+    }
   } else {
-    delta = diff(x$dim$depth$vals)
+    delta = diff(x$dim[[dm]]$vals)
   }
   r = switch(units(delta),
              "hours" = "hour",
              'days' = "day",
              'months' = 'month',
-             "years" = 'years',
-             stop("unit not known:", units(d)))
+             "years" = 'year',
+             "secs" = "sec",
+             "unk")
   r
 }
 
 
-#' Generate one or more filenames for the data
+#' Generate one or more file names for the data
 #' 
-#' Filenames have the form of "id__datetime_depth_period_variable_treatment.ext"
+#' File names have the form of "id__datetime_depth_period_variable_treatment.ext"
 #' Note the double underscore which permits parsing of the id if needed. Multiples
 #' are ordered by first time, then variable and finally depth Presumably, period,
 #' if known, is repeated
 #' 
+#' The pattern is datasetid__time_depth_period_var_treatment.ext
+#'
 #' @export
 #' @param x ncdf4 object or stars object
 #' @param id character, the product or dataset identifier

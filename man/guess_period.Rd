@@ -12,7 +12,7 @@ guess_period(x, dimname = "time")
 \item{dimname}{char the time-dependent dimension name}
 }
 \value{
-character string such as "day", "mon", "year" or NA
+character string such as "day", "mon", "year" or "secs"
 }
 \description{
 Guess the time interval

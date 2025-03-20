@@ -24,6 +24,8 @@ suppressPackageStartupMessages({
   library(yaml)
 })
 
+
+
 fetch_one <- function(date, dataset_id, cfg = NULL, out_path = NULL){
   dataset_id = dataset_id[1]
   charlier::info("fetching %s on %s", dataset_id, format(date, "%Y-%m-%d"))
@@ -60,23 +62,43 @@ fetch_one <- function(date, dataset_id, cfg = NULL, out_path = NULL){
 
 
 
-main = function(date = Sys.Date(), cfg = NULL){
+main = function(date = Sys.Date()-1, cfg = NULL){
   
   if (!inherits(date, "Date")) date = as.Date(date)
   
-  dates <- date + c(0,seq_len(9))
+  P = copernicus::product_lut(cfg$product) |>
+    dplyr::filter(fetch == "yes") |>
+    dplyr::group_by(product_id)
   
-  dataset <- file.path(cfg$product, cfg$region)
-  out_path <- copernicus::copernicus_path(dataset)
   
-  charlier::info("fetch_forecast: %s", dataset)
-  ff <- lapply(seq_along(dates), function(idate) {
-    sapply(names(cfg$dataset), 
-           function(dataset_id){
-             fetch_one(dates[idate], dataset_id, cfg = cfg, out_path = out_path)
-           }) |>
-      unlist()
-  })
+  # productid/region/yyyy/mmdd/datasetid__time_depth_period_var_treatment.ext
+  out_path <- copernicus::copernicus_path(cfg$product, 
+                                          cfg$region, 
+                                          format(date, "%Y"),
+                                          format(date, "%m%d"))
+  ss = P |>
+        fetch_product_by_day(x = date, bb = cfg$bb)
+
+  ff = lapply(names(ss),
+    function(dataset){
+      if (is.null(ss[[dataset]])) return(NULL)
+      vars = names(ss[[dataset]])
+      depth = filter(P, dataset_id == dataset) |>
+        dplyr::filter(short_name %in% vars) |>
+        dplyr::pull(dplyr::all_of("depth"))
+      time = format(date, "%Y-%m-%dT000000")  
+      per = dataset_period(dataset)
+      treatment = "raw"
+      # productid/region/yyyy/mmdd/datasetid__time_depth_period_var_treatment.ext
+      f = file.path(out_path, 
+                    sprintf("%s__%s_%s_%s_%s_%s.tif", dataset, time, depth, per, vars, treatment))
+      ok = copernicus::make_path(dirname(f) |> unique())
+      for (i in seq_along(names(ss[[dataset]]))) {
+        stars::write_stars(ss[[dataset]][i], f[i])
+      }
+      f
+    })
+  
   
   charlier::info("fetch_forecast:updating database")
   DB <- copernicus::read_database(out_path)
@@ -97,7 +119,7 @@ Args = argparser::arg_parser("Fetch copernicus data for one day",
                type = "charcacter") |>
   add_argument("--config",
                help = 'configuration file',
-               default = system.file("config/nwa_daily_fetch_surface.yaml", package = "copernicus")) |>
+               default = system.file("config/fetch_day.yaml", package = "copernicus")) |>
   parse_args()
 
 
@@ -106,7 +128,7 @@ cfg$bb = cofbb::get_bb(cfg$region)
 charlier::start_logger(copernicus::copernicus_path("log"))
 if (!interactive()){
   ok = main(as.Date(Args$date), cfg )
-  charlier::info("fetch_forecast: done")
+  charlier::info("fetch_day: done")
   quit(save = "no", status = ok)
 } else {
   date = as.Date(Args$date)

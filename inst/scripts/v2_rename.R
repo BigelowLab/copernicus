@@ -14,6 +14,7 @@ suppressPackageStartupMessages({
 
 
 product = "global-analysis-forecast-phy-001-024"
+dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m"
 reg = "nwa"
 path = copernicus_path(product, reg)
 ff = list.files(path, recursive = TRUE, pattern = glob2rx("*.tif"),

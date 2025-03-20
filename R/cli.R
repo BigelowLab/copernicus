@@ -39,7 +39,9 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
                             bb = c(xmin = 5, ymin = 38, xmax = 10, ymax = 42),
                             depth = c(0, 10),
                             time = c("2022-01-01", "2022-01-15"),
-                            ofile = "output.nc",
+                            ofile = sprintf("%s_%s_%s.nc",
+                                            product, dataset_id, 
+                                            format(time[1], "%Y-%m-%d")),
                             extra = "--overwrite",
                             app = get_copernicus_app(),
                             log_level = "INFO"){
@@ -66,7 +68,6 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
       time = as.Date(time, format = "%Y-%m-%d") |>
         format("%Y-%m-%dT%H:%M:%S")
     }
-    #s = sprintf('-t "%s" -T "%s"', time[1], time[2])
     s = sprintf('-t %s -T %s', time[1], time[2])
     args = sprintf("%s %s", args, s)
   }

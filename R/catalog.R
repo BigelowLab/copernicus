@@ -75,6 +75,20 @@ tabulate_datasets = function(x = read_dataset_catalog()){
 }
 
 
+#' Guess at the period of dataset given its id
+#' 
+#' @export
+#' @param x one or more dataset_id values
+#' @return chr vector of "day", "month", NA (unknown) etc
+dataset_period = function(x = c("cmems_mod_glo_phy_anfc_0.083deg_P1D-m",
+                                "cmems_mod_glo_phy_anfc_0.083deg_P1M-m")){
+  r = rep(NA_character_, length(x))
+  r[grepl("P1D", x, fixed = TRUE)] <- "day"
+  r[grepl("P1M", x, fixed = TRUE)] <- "month"
+  r
+}
+
+
 #' Read the json dataset catalog
 #' 
 #' @export
@@ -92,6 +106,15 @@ read_dataset_catalog = function(filename = copernicus_path("catalogs/all_product
 }
 
 ## ----------------dataset(s) above and product(s) below --------------------- ##
+
+#' Flatten a particular product suite into one large table
+#' 
+flatten_product = function(x = read_product_catalog() |>
+                            dplyr::filter(product_id == "GLOBAL_ANALYSISFORECAST_PHY_001_024",
+                                          grepl("P1D", dataset_id, fixed = TRUE))){
+ tidyr::unnest(x, cols = dplyr::everything())
+}
+
 
 unpack_product = function(x){
   if (!all(c("title", "product_id", "datasets") %in% names(x))){

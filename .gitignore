@@ -1,6 +1,9 @@
 # data files
 *.nc
 
+# testing files
+inst/explore/*
+
 .DS_Store
 
 # History files

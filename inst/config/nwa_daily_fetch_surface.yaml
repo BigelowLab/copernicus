@@ -2,15 +2,15 @@ region: nwa
 product: global-analysis-forecast-phy-001-024
 dataset:
   currents:
-    dataset_id: cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m:
+    dataset_id: cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m
     vars: 
       - vo
       - uo
     depth:
       - 0
-      - 10
+      - 1
   surface:
-    dataset_id: cmems_mod_glo_phy_anfc_0.083deg_P1D-m:
+    dataset_id: cmems_mod_glo_phy_anfc_0.083deg_P1D-m
     vars:
       - ist
       - mlotst
@@ -29,5 +29,4 @@ dataset:
     depth:
       - 0
       - 10
-      
 log_level: WARN

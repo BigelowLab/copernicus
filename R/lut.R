@@ -1,14 +1,16 @@
 #' Read a product LUT
 #' 
 #' @export
-#' @param productid char, the product identifier
+#' @param product_id char, the product identifier
 #' @return tibble
-product_lut = function(productid = 'global-analysis-forecast-phy-001-024'){
+product_lut = function(product_id = 'GLOBAL_ANALYSISFORECAST_PHY_001_024'){
   
-  filename = system.file(file.path("lut", paste0(productid, ".csv")), package = "copernicus")
-  readr::read_csv(filename, show_col_types = FALSE) |>
-    dplyr::mutate(variables = strsplit(.data$variables, "+", fixed = TRUE),
-                  unit = strsplit(.data$unit, "+", fixed = TRUE))
+  filename = system.file(file.path("lut", paste0(product_id[1], ".csv")),
+                         package = "copernicus")
+  x = readr::read_csv(filename, show_col_types = FALSE) 
+  ix = x$short_name == "sea_surface_temperature_anomaly"
+  x$short_name[ix] = "sstanom"
+  x
 }
 
 

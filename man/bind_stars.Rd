@@ -2,7 +2,7 @@
 % Please edit documentation in R/misc.R
 \name{bind_stars}
 \alias{bind_stars}
-\title{Bind a list of stars objectys into a multi-attribute stars object}
+\title{Bind a list of stars objects into a multi-attribute stars object}
 \usage{
 bind_stars(x)
 }
@@ -13,5 +13,5 @@ bind_stars(x)
 a single multi-attribute stars object
 }
 \description{
-Bind a list of stars objectys into a multi-attribute stars object
+Bind a list of stars objects into a multi-attribute stars object
 }

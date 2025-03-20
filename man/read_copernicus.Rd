@@ -4,22 +4,18 @@
 \alias{read_copernicus}
 \title{Read one or more copernicus files}
 \usage{
-read_copernicus(db, path, depth = as.numeric(db$depth))
+read_copernicus(db, path)
 }
 \arguments{
 \item{db}{tibble, database of selected records}
 
 \item{path}{char, the path to the data set}
-
-\item{depth}{NULL or numeric, the values to assign as depth. If NULL then
-the returned has dimensionality of (variable, x, y, time), but be advised
-you might get unexpectedly ordered time dimension if there are
-duplicate times. Depths can be passed as character type.}
 }
 \value{
 stars object
 }
 \description{
-By default the function tries to return a object with (variable, x, y, depth, time) 
-dimensions.
+By default the function tries to return an object with (variables of x, y, time) 
+dimensions.  If multiple times are provided, then each var must be equally
+represented.
 }

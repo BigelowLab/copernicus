@@ -4,7 +4,7 @@
 \alias{write_database}
 \title{Write the file-list database}
 \usage{
-write_database(x, path, filename = "database.csv.gz")
+write_database(x, path, filename = "database")
 }
 \arguments{
 \item{x}{the tibble or data.frame database}

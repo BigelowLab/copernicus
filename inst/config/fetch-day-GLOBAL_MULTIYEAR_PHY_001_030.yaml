@@ -1,0 +1,4 @@
+region: nwa
+product: GLOBAL_MULTIYEAR_PHY_001_030
+first_date: "1993-01-01"
+log_level: ERROR

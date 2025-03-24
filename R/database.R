@@ -25,6 +25,7 @@ compose_filename <- function(x, path = ".", ext = ".tif"){
 
 #' Decompose a filename into a database
 #'
+#' @export
 #' @param x character, vector of one or more filenames
 #' @param ext character, the extension to remove (including dot)
 #' @return table (tibble) database
@@ -54,12 +55,6 @@ decompose_filename = function(x = c("cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__
     strsplit(split = "__", fixed = TRUE)
   y = sapply(x, '[[', 2) |>
     strsplit(split = "_", fixed = TRUE)
-  #1 = date
-  #2 = time
-  #3 = depth
-  #4 = period
-  #5 = variable
-  #6 = treatment
   
   dt = datetime(sapply(y, '[[', 1))
   dplyr::tibble(
@@ -98,12 +93,12 @@ build_database <- function(path, pattern = "*.tif",
 #' @param filename character, optional filename
 #' @return a tibble
 read_database <- function(path,
-                          filename = "database.csv.gz"){
+                          filename = "database"){
   if (missing(path)) stop("path is required")
   filepath <- file.path(path[1], filename[1])
   stopifnot(file.exists(filepath))
   # date var depth
-  suppressMessages(readr::read_csv(filepath, col_types = 'Dcccc'))
+  suppressMessages(readr::read_csv(filepath, col_types = 'cDccccc'))
 }
 
 #' Write the file-list database
@@ -118,42 +113,61 @@ read_database <- function(path,
 #' @param filename character, optional filename
 #' @return the input tibble (even if saved version has columns dropped)
 write_database <- function(x, path,
-                           filename = "database.csv.gz"){
+                           filename = "database"){
   if (missing(path)) stop("path is required")
   filepath <- file.path(path[1], filename[1])
-  # date var depth
   dummy <- x |>
-    #dplyr::select(.data$date, .data$var, .data$depth) |>
+    select_database() |>
     readr::write_csv(filepath)
   invisible(x)
 }
 
-#' Append one or more rows to a database.
-#'
-#' The databases must have identical column classes and names.
+
+#' Append to the file-list database
 #'
 #' @export
-#' @param db tibble, the database to append to
-#' @param x tibble, the new data to append.  If this has no rows then the
-#'  original database is returned
-#' @param rm_dups logical, if TRUE remove duplicates from combined databases.
-#'  If x has no rows then this is ignored.
-#' @return the updated database tibble
-append_database <- function(db, x, rm_dups = TRUE){
-
-  if (!identical(colnames(db), colnames(x)))
-    stop("x column names must be identical to db column names\n")
-
-  if (!identical(sapply(db, class), sapply(x, class)))
-    stop("x column classes must be identical to db column classes\n")
-
-  if (nrow(x) > 0){
-    db <- dplyr::bind_rows(db, x)
-    if (rm_dups) db <- dplyr::distinct(db)
+#' @param x the tibble or data.frame database
+#' @param path character the directory to where the database should reside
+#' @param filename character, the name of the database file
+#' @return a tibble with appended data
+append_database <- function(x, path, filename = "database"){
+  x = select_database(x)
+  if (!dir.exists(path[1])) stop("path not found:", path[1])
+  origfilename <- file.path(path,filename[1])
+  if(!file.exists(origfilename)){
+    return(write_database(x, path, filename = filename))
   }
-
-  db
+  orig = read_database(path, filename = filename)
+  orig_info = colnames(orig)
+  x_info = colnames(x)
+  ident = identical(orig_info, x_info)
+  if (!isTRUE(ident)){
+    print(ident)
+    stop("input database doesn't match one stored on disk")
+  }
+  dplyr::bind_rows(orig, x) |>
+    dplyr::distinct() |>
+    write_database(path, filename = filename)
 }
+
+#' Retrieve the database pre-defined variable names
+#'
+#' @export
+#' @return charcater vector of variable names
+database_variables = function(){
+  c("id", "date", "time", "depth", "period", "variable", "treatment")
+}
+
+#' Select just the db columns
+#' 
+#' @export
+#' @param x database table
+#' @param cols chr, the column names to keep
+#' @return a database table
+select_database = function(x, cols = database_variables()){
+  dplyr::select(x, dplyr::all_of(cols))
+}
+
 
 
 #' Given a database (days, 8DR or month), determine the times

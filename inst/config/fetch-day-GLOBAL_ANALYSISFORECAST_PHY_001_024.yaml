@@ -1,3 +1,4 @@
 region: nwa
 product: GLOBAL_ANALYSISFORECAST_PHY_001_024
-log_level: WARN
+first_date: 2022-06-01
+log_level: ERROR

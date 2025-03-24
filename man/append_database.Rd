@@ -2,22 +2,20 @@
 % Please edit documentation in R/database.R
 \name{append_database}
 \alias{append_database}
-\title{Append one or more rows to a database.}
+\title{Append to the file-list database}
 \usage{
-append_database(db, x, rm_dups = TRUE)
+append_database(x, path, filename = "database")
 }
 \arguments{
-\item{db}{tibble, the database to append to}
+\item{x}{the tibble or data.frame database}
 
-\item{x}{tibble, the new data to append.  If this has no rows then the
-original database is returned}
+\item{path}{character the directory to where the database should reside}
 
-\item{rm_dups}{logical, if TRUE remove duplicates from combined databases.
-If x has no rows then this is ignored.}
+\item{filename}{character, the name of the database file}
 }
 \value{
-the updated database tibble
+a tibble with appended data
 }
 \description{
-The databases must have identical column classes and names.
+Append to the file-list database
 }

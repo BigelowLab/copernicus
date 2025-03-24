@@ -4,7 +4,7 @@
 \alias{read_database}
 \title{Read a file-list database}
 \usage{
-read_database(path, filename = "database.csv.gz")
+read_database(path, filename = "database")
 }
 \arguments{
 \item{path}{character the directory with the database}

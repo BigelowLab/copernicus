@@ -2,7 +2,7 @@
 % Please edit documentation in R/catalog.R
 \name{tabulate_product_catalog}
 \alias{tabulate_product_catalog}
-\title{Tabulate a dataset catalog}
+\title{Tabulate a product catalog}
 \usage{
 tabulate_product_catalog(x = read_product_catalog())
 }
@@ -13,5 +13,5 @@ tabulate_product_catalog(x = read_product_catalog())
 tibble
 }
 \description{
-Tabulate a dataset catalog
+Tabulate a product catalog
 }

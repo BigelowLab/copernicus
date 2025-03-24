@@ -7,7 +7,8 @@
 fetch_product_by_day(
   p = dplyr::filter(product_lut(), fetch == "yes", product_id == .data$product_id[1]),
   x = Sys.Date() - 7,
-  bb = sf::st_bbox(c(xmin = -180, ymin = -90, xmax = 180, ymax = 90), crs = 4326)
+  bb = sf::st_bbox(c(xmin = -180, ymin = -90, xmax = 180, ymax = 90), crs = 4326),
+  ...
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ fetch_product_by_day(
 \item{x}{Date (or YYYY-mm-dd string)}
 
 \item{bb}{bounding box or somehting from which a bounding box can be found.}
+
+\item{...}{other arguments for [fetch_copernicus_cli_subset]}
 }
 \value{
 list of stars objects (one for each dataset) possibly with NULLs for unknown datasets

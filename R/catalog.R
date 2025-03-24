@@ -109,6 +109,9 @@ read_dataset_catalog = function(filename = copernicus_path("catalogs/all_product
 
 #' Flatten a particular product suite into one large table
 #' 
+#' @export
+#' @param x nested catalog table
+#' @return a flattened tables
 flatten_product = function(x = read_product_catalog() |>
                             dplyr::filter(product_id == "GLOBAL_ANALYSISFORECAST_PHY_001_024",
                                           grepl("P1D", dataset_id, fixed = TRUE))){
@@ -116,6 +119,11 @@ flatten_product = function(x = read_product_catalog() |>
 }
 
 
+#' Unpack a product element
+#' 
+#' @export
+#' @param x json product list
+#' @return a nested product table
 unpack_product = function(x){
   if (!all(c("title", "product_id", "datasets") %in% names(x))){
     stop("this doesn't look like a product catalog")
@@ -128,7 +136,7 @@ unpack_product = function(x){
                   .before = 1)
 }
 
-#' Tabulate a dataset catalog
+#' Tabulate a product catalog
 #' 
 #' @export
 #' @param x catalog list

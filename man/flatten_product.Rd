@@ -9,6 +9,12 @@ flatten_product(
     "GLOBAL_ANALYSISFORECAST_PHY_001_024", grepl("P1D", dataset_id, fixed = TRUE))
 )
 }
+\arguments{
+\item{x}{nested catalog table}
+}
+\value{
+a flattened tables
+}
 \description{
 Flatten a particular product suite into one large table
 }

@@ -44,7 +44,7 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
                                             format(time[1], "%Y-%m-%d")),
                             extra = "--overwrite",
                             app = get_copernicus_app(),
-                            log_level = "INFO"){
+                            log_level = "ERROR"){
 
   
   args = sprintf("subset -i %s --log-level %s", dataset_id[1], toupper(log_level))

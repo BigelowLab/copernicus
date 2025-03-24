@@ -15,7 +15,7 @@ build_cli_subset(
   ofile = sprintf("\%s_\%s_\%s.nc", product, dataset_id, format(time[1], "\%Y-\%m-\%d")),
   extra = "--overwrite",
   app = get_copernicus_app(),
-  log_level = "INFO"
+  log_level = "ERROR"
 )
 }
 \arguments{

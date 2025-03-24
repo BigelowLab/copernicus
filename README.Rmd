@@ -113,6 +113,15 @@ dplyr::slice(x, 1) |>
   dplyr::pull(dplyr::all_of(vars))
 ```
 
+
+## Which data?
+
+[CMEMS](https://data.marine.copernicus.eu/products) offers many products - which ones have we set up for this package? (Note, it's subject to change).
+
+[GLOBAL_MULTIYEAR_PHY_001_030](https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_PHY_001_030/description) 31 Dec 1992 to a month or more lag
+
+[GLOBAL_ANALYSISFORECAST_PHY_001_024](https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_PHY_001_024/description) 31 Oct 2020 to 9 days from present (forecast)
+
 ## Fetching data
 
 To fetch data we'll focus on [ocean physics daily forecast](https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_PHY_001_024/download?dataset=cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m) which serves daily mean sea surface currents.  We'll define a date range and the bounding box that covers the Gulf of Maine (gom).

@@ -28,6 +28,7 @@ fetch_copernicus = function(use = c("cli", "script")[1],
 #' @param p table of product info to be grouped by `dataset_id`
 #' @param x Date (or YYYY-mm-dd string)
 #' @param bb bounding box or somehting from which a bounding box can be found.
+#' @param ... other arguments for [fetch_copernicus_cli_subset]
 #' @return list of stars objects (one for each dataset) possibly with NULLs for unknown datasets
 fetch_product_by_day = function(p = product_lut() |>
                                   dplyr::filter(fetch == "yes",
@@ -35,7 +36,8 @@ fetch_product_by_day = function(p = product_lut() |>
                                 x = Sys.Date()-7,
                                 bb = c(xmin = -180, ymin = -90, 
                                        xmax = 180, ymax = 90) |>
-                                  sf::st_bbox(crs = 4326)){
+                                  sf::st_bbox(crs = 4326),
+                                ...){
   dates = c(x[1], x[length(x)])
 
   p = p |>
@@ -51,52 +53,72 @@ fetch_product_by_day = function(p = product_lut() |>
                                              vars = tbl$short_name,
                                              time = dates,
                                              bb = bb,
-                                             depth = NULL)
+                                             depth = NULL,
+                                             ...)
                },
                "cmems_mod_glo_phy_anfc_0.083deg-sst-anomaly_P1D-m" = {
-                 fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
+                 s = fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
                                              product = tbl$product_id[1],
                                              vars = tbl$short_name,
                                              time = dates,
                                              bb = bb,
-                                             depth = NULL) |>
-                   rlang::set_names("sstanom")
+                                             depth = NULL,
+                                             ...)
+                 if (!is.null(s)) s = s |> rlang::set_names("sstanom")
+                 s
                },
                "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m" = {
-                 fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
+                 s = fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
                                              product = tbl$product_id[1],
                                              vars = tbl$short_name,
                                              time = dates,
                                              bb = bb,
-                                             depth = c(tbl$mindepth[1],tbl$maxdepth[1])) |>
-                   dplyr::slice("depth", 1)
+                                             depth = c(tbl$mindepth[1],tbl$maxdepth[1]),
+                                             ...) 
+                 if (!is.null(s)) s = s |> dplyr::slice("depth", 1)
+                 s
                },
                "cmems_mod_glo_phy-so_anfc_0.083deg_P1D-m" = {
-                 fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
+                 s = fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
                                              product = tbl$product_id[1],
                                              vars = tbl$short_name,
                                              time = dates,
                                              bb = bb,
-                                             depth = c(tbl$mindepth[1],tbl$maxdepth[1]))|>
-                   dplyr::slice("depth", 1)
+                                             depth = c(tbl$mindepth[1],tbl$maxdepth[1]),
+                                             ...)
+                 if (!is.null(s)) s = s |> dplyr::slice("depth", 1)
+                 s
                },
                "cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m" = {
-                 fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
+                 s = fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
                                              product = tbl$product_id[1],
                                              vars = tbl$short_name,
                                              time = dates,
                                              bb = bb,
-                                             depth = c(tbl$mindepth[1],tbl$maxdepth[1]))|>
-                   dplyr::slice("depth", 1)
+                                             depth = c(tbl$mindepth[1],tbl$maxdepth[1]),
+                                             ...)
+                 if (!is.null(s)) s = s |> dplyr::slice("depth", 1)
+                 s
                },
                "cmems_mod_glo_phy-wcur_anfc_0.083deg_P1D-m" = {
+                 s = fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
+                                             product = tbl$product_id[1],
+                                             vars = tbl$short_name,
+                                             time = dates,
+                                             bb = bb,
+                                             depth = c(tbl$mindepth[1],tbl$maxdepth[1]),
+                                             ...)
+                 if (!is.null(s)) s = s |> dplyr::slice("depth", 1)
+                 s
+               },
+               "cmems_mod_glo_phy_my_0.083deg_P1D-m" = {
                  fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
                                              product = tbl$product_id[1],
                                              vars = tbl$short_name,
                                              time = dates,
                                              bb = bb,
-                                             depth = c(tbl$mindepth[1],tbl$maxdepth[1]))|>
-                   dplyr::slice("depth", 1)
+                                             depth = NULL,
+                                             ...)
                },
                {
                  warning("dataset_id not known, contact developer:", key$dataset_id)

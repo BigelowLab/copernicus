@@ -117,7 +117,7 @@ dplyr::slice(x, 1) |>
 ```
 
 
-## Which data?
+## Which products?  Which datasets?
 
 [CMEMS](https://data.marine.copernicus.eu/products) offers many products - which ones have we set up for this package? (Note, it's subject to change).
 
@@ -127,7 +127,7 @@ dplyr::slice(x, 1) |>
 
 ## Fetching data
 
-To fetch data we'll focus on [ocean physics daily forecast](https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_PHY_001_024/download?dataset=cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m) which serves daily mean sea surface currents.  We'll define a date range and the bounding box that covers the Gulf of Maine (gom).
+To fetch data we'll focus on [ocean physics daily forecast](https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_PHY_001_024/download?dataset=cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m) which serves daily mean sea surface currents. We'll define a date range and the bounding box that covers the Gulf of Maine (gom), and we'll confine the request to just the surface data.
 
 ```{r fetch}
 suppressPackageStartupMessages({
@@ -135,17 +135,23 @@ suppressPackageStartupMessages({
   library(copernicus)
   library(dplyr)
 })
+product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_024"
 dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m"    
 vars = c("uo","vo")
 bb = c(xmin = -72, xmax = -63, ymin = 39, ymax = 46)
+path = copernicus_path(product_id, "gom") |>
+  make_path()
 depth = c(0,1) # just the top 1 meter
 time = c(0, 9) + Sys.Date()  # today - and a little ahead window
-x = fetch_copernicus(dataset_id = dataset_id, 
-                     vars = vars, 
-                     bb = bb, 
-                     time = time,
-                     cleanup = FALSE,
-                     verbose = TRUE)
+ofile = copernicus_path("tmp", 
+                        paste0(product_id, "__", dataset_id, ".nc"))
+ok = download_copernicus_cli_subset(dataset_id = dataset_id, 
+                                   vars = vars, 
+                                   depth = depth,
+                                   bb = bb, 
+                                   time = time, 
+                                   ofile = ofile)
+x = stars::read_stars(ofile)
 x
 ```
 
@@ -172,19 +178,29 @@ Here you can see that data set id and the rest of the identifiers are separated 
 
 First we define an output path for the Gulf of Maine data.  The path isn't created until data is written to it.  Then we simply call fetch and write individual GeoTIFF files into a database structure.  Note that we provide an identifier that provides the provenance of the data.  We receive, in turn, a table that serves as a database.
 
+
+
 ```{r archive}
-path = copernicus_path("gom") |>
-  make_path()
-product = "GLOBAL_ANALYSISFORECAST_PHY_001_024"
-dataset = 'cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m'
-time = as.Date("2024-01-01", "2024-01-10")
-depth = c(0,1)
-vars = c("uo", "vo")
-x = fetch_copernicus()
-
-
-db = archive_copernicus(x, path = path, id = 'cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m') |>
-  dplyr::glimpse()
+x = stars::read_stars(ofile) |>
+  dplyr::slice("depth", 1)
+dates = stars::st_get_dimension_values(x, "time")
+db = lapply(names(x),
+  function(nm){
+    db = sprintf("%s__%s_%s_%s_%s_%s%s",
+                 dataset_id,
+                 format(dates, "%Y-%m-%dT000000"),
+                 "sur", 
+                 "day",
+                 nm,
+                 "raw",
+                 ".tif") |>
+      decompose_filename()
+    for(i in seq_along(dates)) write_copernicus(dplyr::slice(x[nm], "time", i), 
+                                                dplyr::slice(db, i),
+                                                path)
+    db
+  }) |>
+  dplyr::bind_rows()
 ```
 
 Since this is the first time you have downloaded and archived data, be sure to save the database.
@@ -201,7 +217,6 @@ Let's walk through reading the database, filtering it for a subset, reading the 
 
 ```{r database, message = FALSE}
 db <- copernicus::read_database(path) |>
-  dplyr::filter(dplyr::between(date, Sys.Date(), Sys.Date()+1)) |>
   dplyr::glimpse()
 ```
 
@@ -211,3 +226,11 @@ Now we can read in the files.
 s = read_copernicus(db, path)
 s
 ```
+
+The database diretcory structure looks like this (requires [fs package](https://CRAN.R-project.org/package=fs)) which you won't need just to use copernicus).
+
+```{r dir_tree}
+fs::dir_tree(path)
+```
+
+It may look complicated, but this permits the storage of multiple datasets per product, and is a very flexible system.

@@ -96,8 +96,6 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
     args = sprintf("%s %s", args, s)
   }
   
-  
-  
   if (!is.null(extra)) args = sprintf("%s %s", args, extra)
   
   args = sprintf("%s -f %s -o %s", args, squote(basename(ofile)), squote(dirname(ofile))) 

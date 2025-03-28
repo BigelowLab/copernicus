@@ -14,7 +14,7 @@ make_path(path, recursive = TRUE, ...)
 \item{...}{other arguments for \code{dir.create}}
 }
 \value{
-logical, TRUE if the path exists or is created
+the path
 }
 \description{
 Given a path - make it if it doesn't exist

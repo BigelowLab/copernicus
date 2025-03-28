@@ -29,53 +29,55 @@ suppressPackageStartupMessages({
   library(yaml)
 })
 
-# Fetch one suite of forecasts (multiple vars, multiple depths, multiple times for 
-# one dataset)
-# @param date the date to fetch
-# @param group the name of the cofuguration grop ("currents", "surface", "bottom", etc)
-# @param cfg the configuration list
-# @param out_path output path
-# @param ahead number of days ahead to retrieve
-fetch_one <- function(date, group,
-                      cfg = NULL, 
-                      out_path = NULL,
-                      ahead = 9){
-  
-  dataset_id = cfg$dataset[[group]]$dataset_id[1]
-  charlier::info("fetching %s on %s", dataset_id, format(date, "%Y-%m-%d"))
-  
-  xx <- copernicus::fetch_copernicus(dataset_id = dataset_id,
-                                     vars = cfg$dataset[[group]][["vars"]],
-                                     time = c(date, date + ahead),
-                                     bb = cfg$bb,
-                                     depth = cfg$dataset[[group]][["depth"]],
-                                     log_level = cfg$log_level,
-                                     verbose = TRUE)
-  ff = generate_filename(xx, id = dataset_id)
-  
-  depth <- rep("sur", length(xx))
-  ix <- grepl("bottom", names(xx), fixed = TRUE)
-  depth[ix] <- "bot"
-  path <- file.path(out_path,
-                    format(date, "%Y"),
-                    format(date, "%m%d"))
-  stopifnot(make_path(path))
-  
-  lut = copernicus::product_lut(cfg$product) |>
-    dplyr::filter(.data$datasetid == dataset_id[1]) |>
-    dplyr::pull(dplyr::all_of("period"))
-  
-  files <- file.path(path,
-                     sprintf("%s_%s_%s_%s_%s.tif",
-                             format(date, "%Y-%m-%d"),
-                             period,
-                             names(xx),
-                             depth,
-                             treatment = "none"))
-  for (i in seq_along(xx)) stars::write_stars(xx[i], files[i])
-  return(files)
-}
 
+#' Fetch varsity for one dataset
+#' @param tbl one or more rows of product lut
+#' @param key likely empty tibble
+#' @param dates the dates to retrieve
+#' @param out_path the output path
+#' @return a database table 
+fetch_dataset = function(tbl, key, dates = NULL, out_path = NULL, cfg = NULL){
+  ofile = copernicus_path("tmp", "forecast.nc")
+  depths = c(0,1)
+  ok <- download_copernicus_cli_subset(ofile = ofile,
+                                    dataset_id = tbl$dataset_id[1],
+                                    vars = tbl$short_name,
+                                    time = c(dates[1], dates[length(dates)]),
+                                    depth = depths,
+                                    bb = cfg$bb,
+                                    log_level = cfg$log_level,
+                                    verbose = interactive())
+  x = read_stars(ofile) 
+  d = dim(x)
+  if ("depth" %in% names(d)) x = dplyr::slice(x, "depth", 1)
+  
+  names(x) <- tbl$short_name
+  period = "day"
+  treatment = "raw"
+  time = format(dates, "%Y-%m-%dT00000")
+  db = tbl |> 
+    rowwise()|>
+    group_map(
+      function(p, k){
+        nm = p$short_name
+        fname = sprintf("%s__%s_%s_%s_%s_%s.tif", 
+                  p$dataset_id, 
+                  time, 
+                  p$depth, 
+                  period, 
+                  nm, 
+                  treatment)
+        db = decompose_filename(fname)
+        ofiles = compose_filename(db, out_path)
+        for (i in seq_along(fname)){
+          ok = make_path(dirname(ofiles[i]))
+          s = stars::write_stars(dplyr::slice(x[nm], "time", i), ofiles[i])
+        }
+        db
+      } ) |>
+    dplyr::bind_rows()
+  db
+}
 
 
 main = function(date = Sys.Date(), cfg = NULL){
@@ -84,25 +86,23 @@ main = function(date = Sys.Date(), cfg = NULL){
   
   dates <- date + c(0,seq_len(9))
   
-  P = copernicus::product_lut(cfg$product)
+  P = copernicus::product_lut(cfg$product) |>
+    dplyr::filter(fetch == "yes")
 
   out_path <- copernicus::copernicus_path(cfg$product, cfg$region)
   
-  ff <- lapply(seq_along(dates), function(idate) {
-      sapply(names(cfg$dataset), 
-        function(what){
-          fetch_one(dates[idate], what, cfg$dataset[[what]]$dataset_id, cfg = cfg, out_path = out_path)
-        }) |>
-       unlist()
-      })
   
-  charlier::info("fetch_forecast:updating database")
-  DB <- copernicus::read_database(out_path)
-  db <- unlist(ff) %>%
-    copernicus::decompose_filename() %>%
-    copernicus::append_database(DB) %>%
-    dplyr::arrange(date) %>%
-    copernicus::write_database(out_path)
+  db = P |>
+    group_by(dataset_id) |>
+    group_map(fetch_dataset, 
+              out_path =  out_path, 
+              cfg = cfg, 
+              dates = dates,
+              .keep = TRUE) |>
+    bind_rows() |>
+    append_database(out_path)
+  
+  
   return(0)
 }
 
@@ -115,20 +115,16 @@ Args = argparser::arg_parser("Fetch a copernicus forecast",
                type = "charcacter") |>
   add_argument("--config",
                help = 'configuration file',
-               default = system.file("config/nwa_daily_fetch_surface.yaml", package = "copernicus")) |>
+               default = system.file("config/fetch-day-GLOBAL_ANALYSISFORECAST_PHY_001_024.yaml", package = "copernicus")) |>
   parse_args()
 
 
 cfg = yaml::read_yaml(Args$config)
 cfg$bb = cofbb::get_bb(cfg$region)
 charlier::start_logger(copernicus::copernicus_path("log"))
+date = as.Date(Args$date)
 if (!interactive()){
-  ok = main(as.Date(Args$date), cfg )
+  ok = main(date, cfg )
   charlier::info("fetch_forecast: done")
   quit(save = "no", status = ok)
-} else {
-  date = as.Date(Args$date)
-}
-
-
-
+} 

@@ -86,13 +86,13 @@ copernicus_path <- function(...,
 #' @param path character, the path to check and/or create
 #' @param recursive logical, create paths recursively?
 #' @param ... other arguments for \code{dir.create}
-#' @return logical, TRUE if the path exists or is created
+#' @return the path
 make_path <- function(path, recursive = TRUE, ...){
   ok <- dir.exists(path[1])
   if (!ok){
     ok <- dir.create(path, recursive = recursive, ...)
   }
-  ok
+  path
 }
 
 

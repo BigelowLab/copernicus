@@ -28,16 +28,28 @@ suppressPackageStartupMessages({
 #' @param cfg the configuration
 #' @param data_path the data directory
 fetch_this_day = function(date, cfg, data_path, P){
-  
-  daynum = format(date, "%d")
-  if (daynum == "01") charlier::info("backfill_days:fetching %s", format(date, "%Y-%b"))
+  charlier::info("backfill_days: fetching %s", format(date, "%Y-%m-%d"))
+  #daynum = format(date, "%d")
+  #if (daynum == "01") charlier::info("backfill_days:fetching %s", format(date, "%Y-%b"))
   
   out_path <- copernicus::copernicus_path(cfg$product, 
                                           cfg$region, 
                                           format(date, "%Y"),
                                           format(date, "%m%d"))
-  ss = P |>
-    fetch_product_by_day(x = date, bb = cfg$bb)
+  ss = try( P |>
+    fetch_product_by_day(x = date, bb = cfg$bb))
+  if (inherits(ss, "try-error")){
+    MISSED_COUNT <<- MISSED_COUNT + 1
+    charlier::warn("backfill_days: failed to fetch %s", format(date, "%Y-%m-%d"))
+    return(NULL)
+  }
+  isnull = sapply(ss, is.null)
+  ss = ss[!isnull]
+  if (length(ss) == 0){
+    MISSED_COUNT <<- MISSED_COUNT + 1
+    charlier::warn("backfill_days: unable to fetch %s", format(date, "%Y-%m-%d"))
+    return(NULL)
+  }
   
   ff = lapply(names(ss),
               function(dataset){
@@ -84,14 +96,25 @@ main = function(cfg = NULL){
     missing_dates = all_dates
   }
   charlier::info("backfill_days: missing %i days", length(missing_dates))
-  dbs = lapply(seq_along(missing_dates),
-               function(i){
-                 fetch_this_day(missing_dates[i], cfg, data_path, P)
-               }) |>
-    dplyr::bind_rows()
   
-  DB = dbs |>
-    append_database(data_path)
+  # here we do an explicit loop as we wish to optionally terminate the 
+  # process early if we miss three or more dates - which likely implies...
+  # a. the date(s) are not available
+  # b. credentials are messed up somehow
+  # c. catalog/dataset mash up?
+  
+  # an emplyt list of the needed length
+  dbs = vector(mode = "list", length = length(missing_dates))
+  # loop through - testing for missing each time, break if exceeded
+  # 
+  for (i in seq_along(missing_dates)){
+    dbs[[i]] = fetch_this_day(missing_dates[i], cfg, data_path, P)
+    if (MISSED_COUNT > MAX_MISSED_COUNT) break
+  }
+  
+  dbs =  dplyr::bind_rows(dbs)
+  
+  if (nrow(dbs) > 0) DB = dbs |> append_database(data_path)
   
   return(0)
 }
@@ -110,6 +133,10 @@ cfg = yaml::read_yaml(Args$config)
 cfg$bb = cofbb::get_bb(cfg$region)
 charlier::start_logger(copernicus_path(cfg$product, cfg$reg, "log"))
 charlier::info("backfill_days for %s", cfg$product)
+
+MAX_MISSED_COUNT = 3
+MISSED_COUNT = 0
+
 if (!interactive()){
   ok = main( cfg )
   charlier::info("backfill_days: done")

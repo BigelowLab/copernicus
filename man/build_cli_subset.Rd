@@ -6,16 +6,18 @@
 \usage{
 build_cli_subset(
   dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
-  product = "global-analysis-forecast-phy-001-024",
-  vars = unlist(dplyr::pull(dplyr::filter(product_lut(product[1]), datasetid ==
-    dataset_id), .data$variables)),
+  product = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
+  vars = unlist(dplyr::pull(dplyr::filter(product_lut(product[1]), .data$dataset_id ==
+    dataset_id), dplyr::all_of("short_name"))),
   bb = c(xmin = 5, ymin = 38, xmax = 10, ymax = 42),
-  depth = c(0, 10),
+  depth = c(0, 1),
   time = c("2022-01-01", "2022-01-15"),
-  ofile = sprintf("\%s_\%s_\%s.nc", product, dataset_id, format(time[1], "\%Y-\%m-\%d")),
+  ofile = sprintf("\%s_\%s_\%s.nc", product, dataset_id, format(as.Date(time[1]),
+    "\%Y-\%m-\%d")),
   extra = "--overwrite",
   app = get_copernicus_app(),
-  log_level = "ERROR"
+  dry_run = FALSE,
+  log_level = ifelse(dry_run, "DEBUG", "ERROR")
 )
 }
 \arguments{
@@ -37,6 +39,10 @@ a 4 element named vector with "xmin", "xmax", "ymin" and "ymax" named elements}
 \item{extra}{NULL or character, any other arguments for \code{copernicusmarine subset}}
 
 \item{app}{char, the name of the application to run (default is "copernicusmarine")}
+
+\item{dry_run}{logical, if TRUE enter at DEBUG_LEVEL mode and just do a dry run (no data download)}
+
+\item{log_level}{chr, one of DEBUG | INFO | WARN | ERROR | CRITICAL | QUIET}
 }
 \value{
 named 2 element character vector of the app and the args

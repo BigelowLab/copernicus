@@ -7,26 +7,33 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Provides access, download and archiving tools for [Copernicus](https://marine.copernicus.eu/) marine datasets using R language. This package has been developed primarily around the [daily ocean physics forecast](https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_PHY_001_024/download?dataset=cmems_mod_glo_phy_anfc_0.083deg_P1D-m) but with no or minimal modification it can work with other products.
+Provides access, download and archiving tools for [Copernicus](https://marine.copernicus.eu/) marine datasets using R language. This package has been developed primarily around ...
+
++ [GLOBAL_MULTIYEAR_PHY_001_030](https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_PHY_001_030/description) 31 Dec 1992 to a month or more lag
+
++ [GLOBAL_ANALYSISFORECAST_PHY_001_024](https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_PHY_001_024/description) 31 Oct 2020 to 9 days from present (forecast)
+
+
+With no or minimal modification it can work with other products.
 
 ### Note
 
 In 2023/2024 Copernicus migrated to a new service model; learn more [here](https://help.marine.copernicus.eu/en/articles/7045314-migrating-to-the-new-global-physical-analysis-and-forecasting-system). This migration introduced the [Copernicus Marine Toolbox](https://help.marine.copernicus.eu/en/collections/4060068-copernicus-marine-toolbox) which provides a Python API and a command line interface (CLI).  This package leverages the latter.
 
 
-The toolbox is under active development, so if you are having troubles (like we have sometimes!) try reinstalling.  We have some notes [here](https://github.com/BigelowLab/copernicus/wiki/Installation-of-%60copernicusmarine%60).
+The toolbox is under active development, so if you are having troubles (like we have sometimes!) try re-installing.  We have some notes [here](https://github.com/BigelowLab/copernicus/wiki/Installation-of-%60copernicusmarine%60).
 
 # Copernicus resources
 
 Copernicus serves **so many** data resources; finding what you want can be a challenge.  Check out the new [Marine Data Store](https://marine.copernicus.eu/news/introducing-new-copernicus-marine-data-store). And checkout the listing [here](https://marine.copernicus.eu/about/producers).
 
-## The all important datasetID
+## Data catalogs
 
-Like data offerings from [OBPG](https://oceancolor.gsfc.nasa.gov/), Copernicus strives to provided consistent dataset identifiers that are easily decoded programmatically (and with practice by eye). In order to download programmatically you must have the datasetID in hand. Learn more about Copernicus [nomenclature rules here](https://help.marine.copernicus.eu/en/articles/6820094-how-is-defined-the-nomenclature-of-copernicus-marine-data#h_34a5a6f21d).
+Like data offerings from [OBPG](https://oceancolor.gsfc.nasa.gov/), Copernicus strives to provided consistent dataset identifiers that are easily decoded programmatically (and with practice by eye). In order to download programmatically you must have the datasetID in hand. Learn more about Copernicus [nomenclature rules here](https://help.marine.copernicus.eu/en/articles/6820094-how-is-defined-the-nomenclature-of-copernicus-marine-data#h_34a5a6f21d).  We leverage the [data catalogs] which link a **product** to one or more of its **datasets**.  Did you catch that?  Copernicus distributes **products** each of which comes as one or more **datasets**.  There's mor eon that later.
 
 ## `get` or `subset`
 
-The [Copernicus Marine Toolbox](https://help.marine.copernicus.eu/en/collections/4060068-copernicus-marine-toolbox) command-line application, `copernicus-marine` provides two primary methods for donwloading data: `get` and `subset`. `get` is not well documented, but subset does what it implies - subsetting resources by variable, spatial bounding box and time.  This package only supports `subset`.
+The [Copernicus Marine Toolbox](https://help.marine.copernicus.eu/en/collections/4060068-copernicus-marine-toolbox) command-line application, `copernicus-marine` provides two primary methods for donwloading data: `get` and `subset`. `get` is not well documented, but subset does what it implies - subsetting resources by variable, spatial bounding box, depth and time.  This package only supports `subset`.
 
 ## Requirements
 
@@ -53,22 +60,21 @@ You can preconfigure a credentials file (required) and a path definition file (o
 
 ### Configure credentials
 
-You must have credentials to access Copernicus holdings - if you don't have them now please request access [here](https://data.marine.copernicus.eu/register). 
-
-Once you have them you can add them to a file hidden in your home directory. The functions in this package the require the credentials know where to look for them.  We don't actually run this in the README, but you can copy-and-paste to use in R.  Obviously you would supply your own `username:password` values.
-
+You must have credentials to access Copernicus holdings - if you don't have them now please request access [here](https://data.marine.copernicus.eu/register).  Go straight to it [here](https://help.marine.copernicus.eu/en/articles/8185007-copernicus-marine-toolbox-credentials-configuration).
 
 ### Configure data path
 
-If you plan to use our directory-driven database storage system then you should set the root path for the data directory.  You can always change or override it, but, like credentials, storing this path in a hidden file will ease subsequent use of the functions. We don't actually run this in the README, but you can copy-and-paste to use in R.  Again, replace the path with one suiting your own situation.
+If you plan to use our directory-driven database storage system then you should set the root path for the data directory; keep in mind that you can always change or override it. We don't actually run this in the README, but you can copy-and-paste to use in R.  Again, replace the path with one suiting your own situation.
 
 ```
 copernicus::set_root_path("/the/path/to/copernicus/data")
 ```
 
+Once it is set, you shouldn't have to set it again (unless you want to change the path).
+
 #### Configure the application path
 
-If you are using R within a RStudio session, you may encounter issues where `system()` and `system2()` cant find the `copernicusmarine` application. This is not the case when you run R outside of the RStudio context. Technically, this is a environmental path issue, which you can remedy by providing the full path specification for the `app` argument to the function `build_cli_subset()`.  By default, `app = 'copernicusmarine`, but you may need to include the full path specification.  We provide a mechanism for storing this path in a configuration file once, and then it will work without issue in subsequent sessions of R. Here's how we set ours. 
+If you are using R within a RStudio session, you may encounter issues where `system()` and `system2()` can't' find the `copernicusmarine` application. This is not the case when you run R outside of the RStudio context. Technically, this is a environmental path issue, which you can remedy by providing the full path specification for the `app` argument to the function `build_cli_subset()`.  By default, `app = 'copernicusmarine`, but you may need to include the full path specification.  We provide a mechanism for storing this path in a configuration file once, and then it will work without issue in subsequent sessions of R. Here's how we set ours. 
 
 First determine the app path in the terminal session (outside of RStudio context).
 
@@ -96,17 +102,14 @@ You can download a product catalog for local storage.
 ok = copernicus::fetch_product_catalog()
 ```
 
-This downloads into a "catalogs" drectory within your data directory Now read it in.
+This downloads into a "catalogs" directory within your data directory Now read it in.
 
 ```{r read_catalog}
 x = copernicus::read_product_catalog()
-kableExtra::kbl(x) |>
-  kableExtra::kable_styling(fixed_thead = TRUE, 
-                            bootstrap_options = c("striped", "hover")) |>
-  kableExtra::scroll_box(width = "100%", height = "200px")
+x
 ```
 
-This provides a table of available datasets along with tables of variables for each (if any).  For example, the first row has the following variables table.
+This provides a nested table of available datasets along with tables of variables for each (if any).  For example, the first row has the following variables table.
 
 ```{r variable_table}
 dplyr::slice(x, 1) |>
@@ -135,8 +138,8 @@ suppressPackageStartupMessages({
 dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m"    
 vars = c("uo","vo")
 bb = c(xmin = -72, xmax = -63, ymin = 39, ymax = 46)
-depth = c(0,1) # just the top 10 meters
-time = (c(0, 9) + Sys.Date())  # today - and a little ahead window
+depth = c(0,1) # just the top 1 meter
+time = c(0, 9) + Sys.Date()  # today - and a little ahead window
 x = fetch_copernicus(dataset_id = dataset_id, 
                      vars = vars, 
                      bb = bb, 
@@ -149,42 +152,37 @@ x
 We can plot a subset of these using base graphics and the `[` function.  `stars` objects are indexed first by the attribute (variable) followed by the dimensions.  In this case the index order is [`attribute`, `x`, `y`, `depth`, `time`] or [`attribute`, `x`, `y`, `time`] for single-depth objects.  
 
 ```{r first_plot}
-itime = 1
-date = format(st_get_dimension_values(x, "time")[itime], "%Y-%m-%d")
-plot(x[1, , , , itime], key.lab = paste("uo for each depth on", date))
-```
-
-If you want to plot all of the times for a given depth you can use `slice`.
-
-```{r second_plot}
-idepth = 1
-depth = round(st_get_dimension_values(x, 'depth')[idepth],2)
-plot(slice(x, "depth", idepth), 
-     key.lab = paste0("uo at depth ", depth, "m"))
+plot(dplyr::slice(x, "depth", 1) )
 ```
 
 ## Archiving data
 
 You can download and archive data using the database functionality provided in this package.  There are a number of ways to manage suites of data, this is just one fairly light weight method.
 
-Here, we store data in a directory tree that starts with `region` at it's root. Within the `region` we divide by `year`, `monthday`.  Within in each `monthday` directory there are one or more files uniquely named to provide complete identification of datasetid, time, depth, period, variable and treatment. Each file contains one raster for one variable at one depth and one time.   
+Here, we store data in a directory tree that starts with `product` and `region` at it's root. Within the `region` we divide by `year`, `monthday`.  Within in each `monthday` directory there are one or more files uniquely named to provide complete identification of datasetid, time, depth, period, variable and treatment. Each file contains one raster for one variable at one depth and one time.   
 
-Here is an example of a file name that follows this pattern.
-
-`datasetid__time_depth_period_variable_treatment.tif`
-
+Here is an example of a file name that follows this pattern `datasetid__date_time_depth_period_variable_treatment.tif`.
 ```
-gom/2023/1205/cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2023-12-05T000000_0.49_day_uo_raw.tif
+GLOBAL_ANALYSISFORECAST_PHY_001_024/nwa/2022/0601/cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2022-06-01T000000_sur_day_uo_raw.tif
 ```
 
-Here you can see that datasetid and the rest of the identifiers are separated by a double underscore to aid in programmatic parsing.  Time includes the hour in case we ever want to download the 6-hour datasets.  The depth is rounded to three significant digits by default, but that is configurable. The treatment, `raw`, in this case means the values are as downloaded, however, if you ever wanted to roll your own running mean (say 8-day rolling mean) or some other statistic this naming system provides the flexibility you will need.
+Here you can see that data set id and the rest of the identifiers are separated by a double underscore to aid in programmatic parsing.  Time includes the hour in case we ever want to download the 6-hour data sets.  Depth is currenly only expressed as "sur", "bot" and "mld", but use of measured values such as "1.493" *etc.* is allowed but not currently used. The treatment, `raw`, in this case means the values are as downloaded, however, if you ever wanted to roll your own running mean (say 8-day rolling mean) or some other statistic this naming system provides the flexibility you will need.
 
 **NOTE** Don't forget to [set your root data path](#Configure-data-path).
 
-First we define an output path for the Gulf of Maine data.  The path isn't created until data is written to it.  Then we simply call `archive_copernicus()` to automatically write individual GeoTIFF files into a database structure.  Note that we provide an identifier that provides the provenance of the data.  We receive, in turn, a table that serves as a database.
+First we define an output path for the Gulf of Maine data.  The path isn't created until data is written to it.  Then we simply call fetch and write individual GeoTIFF files into a database structure.  Note that we provide an identifier that provides the provenance of the data.  We receive, in turn, a table that serves as a database.
 
 ```{r archive}
-path = copernicus_path("gom")
+path = copernicus_path("gom") |>
+  make_path()
+product = "GLOBAL_ANALYSISFORECAST_PHY_001_024"
+dataset = 'cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m'
+time = as.Date("2024-01-01", "2024-01-10")
+depth = c(0,1)
+vars = c("uo", "vo")
+x = fetch_copernicus()
+
+
 db = archive_copernicus(x, path = path, id = 'cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m') |>
   dplyr::glimpse()
 ```

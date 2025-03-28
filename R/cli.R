@@ -28,37 +28,61 @@ squote = function(x, fancy = FALSE){
 #' @param ofile char, the output filename (default is "./output.nc")
 #' @param extra NULL or character, any other arguments for \code{copernicusmarine subset}
 #' @param app char, the name of the application to run (default is "copernicusmarine")
+#' @param dry_run logical, if TRUE enter at DEBUG_LEVEL mode and just do a dry run (no data download)
+#' @param log_level chr, one of DEBUG | INFO | WARN | ERROR | CRITICAL | QUIET
 #' @return named 2 element character vector of the app and the args
 #' copernicusmarine subset -i cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m -x 5.0 -X 10.0 -y 38.0 -Y 42.0 -z 0. -Z 10. -v uo -v vo -t 2022-01-01 -T 2022-01-15 -o ./copernicus-data -f dataset_subset.nc
 build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
-                            product = "global-analysis-forecast-phy-001-024",
+                            product = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
                             vars = product_lut(product[1]) |>
-                              dplyr::filter(datasetid == dataset_id) |>
-                              dplyr::pull(.data$variables) |>
+                              dplyr::filter(.data$dataset_id == dataset_id) |>
+                              dplyr::pull(dplyr::all_of("short_name")) |>
                               unlist(),
                             bb = c(xmin = 5, ymin = 38, xmax = 10, ymax = 42),
-                            depth = c(0, 10),
+                            depth = c(0, 1),
                             time = c("2022-01-01", "2022-01-15"),
                             ofile = sprintf("%s_%s_%s.nc",
                                             product, dataset_id, 
-                                            format(time[1], "%Y-%m-%d")),
+                                            format(as.Date(time[1]), "%Y-%m-%d")),
                             extra = "--overwrite",
                             app = get_copernicus_app(),
-                            log_level = "ERROR"){
+                            dry_run = FALSE,
+                            log_level = ifelse(dry_run, "DEBUG", "ERROR") ){
 
+  if (FALSE){
+    dataset_id = "cmems_mod_glo_phy_my_0.083deg_P1D-m"
+    product = "GLOBAL_MULTIYEAR_PHY_001_030"
+    vars = product_lut(product[1]) |>
+      dplyr::filter(.data$dataset_id == dataset_id) |>
+      dplyr::pull(dplyr::all_of("short_name")) |>
+      unlist()
+    time = structure(c(8401, 8401), class = "Date")
+    ofile = sprintf("%s_%s_%s.nc",
+                    product, dataset_id, 
+                    format(time[1], "%Y-%m-%d"))
+    extra = "--overwrite"
+    app = get_copernicus_app()
+    log_level = "ERROR"
+    dry_run = FALSE
+  }
   
   args = sprintf("subset -i %s --log-level %s", dataset_id[1], toupper(log_level))
+  
   if (!is.null(vars)){
     s = paste(paste("-v", vars), collapse = " ")
     args = sprintf("%s %s", args, s)
   }
+  
+  if (dry_run) args = paste(args, "--dry-run")
+  
   if (!is.null(bb)){
     if (!inherits(bb, 'numeric')) bb = as.numeric(bb)
     s = sprintf("-x %0.2f -X %0.2f -y %0.2f -Y %0.2f", bb[['xmin']], bb[['xmax']], bb[["ymin"]], bb[['ymax']])
     args = sprintf("%s %s", args, s)
   }
-  if (!is.null(depth)){
-    s = sprintf("-z %0.2f -Z %0.2f", depth[1], depth[2])
+  # if depth is NULL or both elements are NA then skip
+  if (!is.null(depth) & (!all(is.na(depth[1])))){
+    s = sprintf("-z %0.2f -Z %0.2f", as.numeric(depth[1]), as.numeric(depth[2]))
     args = sprintf("%s %s", args, s)
   }
   if (!is.null(time)){
@@ -71,6 +95,8 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
     s = sprintf('-t %s -T %s', time[1], time[2])
     args = sprintf("%s %s", args, s)
   }
+  
+  
   
   if (!is.null(extra)) args = sprintf("%s %s", args, extra)
   
@@ -108,17 +134,18 @@ download_copernicus_cli_subset = function(..., verbose = FALSE){
 #' @param ofile chr, the temporary (?) outfile
 #' @inheritDotParams download_copernicus_cli_subset
 #' @param cleanup logical, if TRUE clean up files
-#' @return named list of stars objects (organized by variable)
+#' @return named list of stars objects (organized by variable) or NULL
 fetch_copernicus_cli_subset = function(ofile = "output.nc", 
                                 cleanup = TRUE,
                                 ...){
   
-  ok = download_copernicus_cli_subset(ofile = ofile, ...)
+  ok = try(download_copernicus_cli_subset(ofile = ofile, ...))
+  if (inherits(ok, "try-error")) return(NULL)
   if (ok != 0){
     message("download failed for ", basename(ofile))
     return(NULL)
   }
-  
+  # read in as stars
   x = unpack_copernicus(ofile)
   if (cleanup) file.remove(ofile)
   x

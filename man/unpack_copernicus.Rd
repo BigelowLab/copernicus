@@ -4,13 +4,15 @@
 \alias{unpack_copernicus}
 \title{Unpack a copernicus ncdf4 file}
 \usage{
-unpack_copernicus(filename, banded = TRUE)
+unpack_copernicus(filename, banded = FALSE, bind = TRUE)
 }
 \arguments{
 \item{filename}{character, the full path specification}
 
 \item{banded}{logical, see \code{\link{get_var}}.  Setting to FALSE
 returns single band objects (depth and time dropped)}
+
+\item{bind}{logical, if TRUE bind the outputs into one stars object}
 }
 \value{
 list of \code{stars} objects

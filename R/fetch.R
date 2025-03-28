@@ -10,8 +10,9 @@ fetch_copernicus = function(use = c("cli", "script")[1],
                             ...){
   use = tolower(use[1])
   x = switch(use,
-         'cli' = fetch_copernicus_cli_subset(...),
+         'cli' = try(fetch_copernicus_cli_subset(...)),
          stop("only cli downloads are supported")) 
+  if (inherits(x, "try-error")) return(NULL)
   if (!is.null(x) && !inherits(x, 'stars') && bind){
     x = bind_stars(x)
   }
@@ -48,77 +49,93 @@ fetch_product_by_day = function(p = product_lut() |>
       function(tbl, key){
         switch(key$dataset_id,
                "cmems_mod_glo_phy_anfc_0.083deg_P1D-m" = {
-                 fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
+                 s = try(fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
                                              product = tbl$product_id[1],
                                              vars = tbl$short_name,
                                              time = dates,
                                              bb = bb,
                                              depth = NULL,
-                                             ...)
+                                             ...))
+                 if (inherits(s, "try-error")){
+                   s = NULL
+                 }
+                 s
                },
                "cmems_mod_glo_phy_anfc_0.083deg-sst-anomaly_P1D-m" = {
-                 s = fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
+                 s = try(fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
                                              product = tbl$product_id[1],
                                              vars = tbl$short_name,
                                              time = dates,
                                              bb = bb,
                                              depth = NULL,
-                                             ...)
+                                             ...))
+                 if (inherits(s, "try-error")){
+                   s = NULL
+                 }
                  if (!is.null(s)) s = s |> rlang::set_names("sstanom")
                  s
                },
                "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m" = {
-                 s = fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
+                 s = try(fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
                                              product = tbl$product_id[1],
                                              vars = tbl$short_name,
                                              time = dates,
                                              bb = bb,
                                              depth = c(tbl$mindepth[1],tbl$maxdepth[1]),
-                                             ...) 
+                                             ...))
+                 if (inherits(s, "try-error")){
+                   s = NULL
+                 }
                  if (!is.null(s)) s = s |> dplyr::slice("depth", 1)
                  s
                },
                "cmems_mod_glo_phy-so_anfc_0.083deg_P1D-m" = {
-                 s = fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
+                 s = try(fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
                                              product = tbl$product_id[1],
                                              vars = tbl$short_name,
                                              time = dates,
                                              bb = bb,
                                              depth = c(tbl$mindepth[1],tbl$maxdepth[1]),
-                                             ...)
+                                             ...))
+                 if (inherits(s, "try-error")) s = NULL
+                 
                  if (!is.null(s)) s = s |> dplyr::slice("depth", 1)
                  s
                },
                "cmems_mod_glo_phy-thetao_anfc_0.083deg_P1D-m" = {
-                 s = fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
+                 s = try(fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
                                              product = tbl$product_id[1],
                                              vars = tbl$short_name,
                                              time = dates,
                                              bb = bb,
                                              depth = c(tbl$mindepth[1],tbl$maxdepth[1]),
-                                             ...)
+                                             ...))
+                 if (inherits(s, "try-error")) s = NULL
                  if (!is.null(s)) s = s |> dplyr::slice("depth", 1)
                  s
                },
                "cmems_mod_glo_phy-wcur_anfc_0.083deg_P1D-m" = {
-                 s = fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
+                 s = try(etch_copernicus_cli_subset(dataset_id = key$dataset_id,
                                              product = tbl$product_id[1],
                                              vars = tbl$short_name,
                                              time = dates,
                                              bb = bb,
                                              depth = c(tbl$mindepth[1],tbl$maxdepth[1]),
-                                             ...)
+                                             ...))
+                 if (inherits(s, "try-error")) s = NULL
                  if (!is.null(s)) s = s |> dplyr::slice("depth", 1)
                  s
                },
                "cmems_mod_glo_phy_my_0.083deg_P1D-m" = {
-                 fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
+                 s = try(fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
                                              product = tbl$product_id[1],
                                              vars = tbl$short_name,
                                              time = dates,
                                              bb = bb,
-                                             depth = NULL,
-                                             ...)
+                                             depth = c(tbl$mindepth[1],tbl$maxdepth[1]),
+                                             ...))
+                 if (inherits(s, "try-error")) s = NULL
+                 s
                },
                {
                  warning("dataset_id not known, contact developer:", key$dataset_id)

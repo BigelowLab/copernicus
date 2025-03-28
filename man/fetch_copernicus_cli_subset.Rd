@@ -18,7 +18,7 @@ fetch_copernicus_cli_subset(ofile = "output.nc", cleanup = TRUE, ...)
   }}
 }
 \value{
-named list of stars objects (organized by variable)
+named list of stars objects (organized by variable) or NULL
 }
 \description{
 This is a wrapper around \code{\link{download_copernicus_cli_subset}} that

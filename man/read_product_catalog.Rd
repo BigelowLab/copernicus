@@ -11,6 +11,8 @@ read_product_catalog(
 }
 \arguments{
 \item{filename}{chr the path to the file}
+
+\item{tabulate}{logical, if TRUE transform to a table}
 }
 \value{
 a named list of json element

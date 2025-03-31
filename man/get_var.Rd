@@ -36,8 +36,8 @@ FALSE then allow only one value for time and depth and degenerate dimensions}
 
 \item{form}{character, either 'array' of 'stars' (default)
 \itemize{
-  \item{array}{an array or list of arrays, possibly degenerate to a matrix}
-  \item{stars}{a stars object, possibly with band (time) and z (depth)}
+  \item{array an array or list of arrays, possibly degenerate to a matrix}
+  \item{stars a stars object, possibly with band (time) and z (depth)}
 }}
 }
 \description{

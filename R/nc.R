@@ -168,7 +168,7 @@ list_dims <- function(x){
 #'   \item{\code{time} POSIXct vector}
 #'   \item{\code{all} list of \code{lon, lat, depth, time} vectors}
 #' }
-get_loc <- function(x, what = 'time', ...){
+get_loc <- function(x, what = 'time'){
   switch(tolower(what[1]),
          "lon" = get_lon(x),
          "lat" = get_lat(x),
@@ -296,10 +296,10 @@ get_vardims <- function(x, var = get_varnames(x)[1]){
 #' @param var variable id (name)
 #' @param index named list of \code{[start,length]} vectors for each dimension
 #' \itemize{
-#' \item{lon}{such as c(1,913)}
-#' \item{lat}{such as c(1,443)}
-#' \item{time}{such as c(5, 7) which starts on the 5th and ends on the 12th}
-#' \item{depth}{such as c(8,1) which retrieves just the 8th depth}
+#' \item{lon, such as c(1,913)}
+#' \item{lat, such as c(1,443)}
+#' \item{time, such as c(5, 7) which starts on the 5th and ends on the 12th}
+#' \item{depth, such as c(8,1) which retrieves just the 8th depth}
 #' }
 #' @param collapse_degen logical, if FALSE then preserve length 1 dimensions
 #'  NAM218 grib files have variables with either \code{[lon, lat, time]} or
@@ -352,8 +352,8 @@ get_var_array <- function(x, var, index, collapse_degen = FALSE){
 #'        FALSE then allow only one value for time and depth and degenerate dimensions
 #' @param form character, either 'array' of 'stars' (default)
 #' \itemize{
-#'   \item{array}{an array or list of arrays, possibly degenerate to a matrix}
-#'   \item{stars}{a stars object, possibly with band (time) and z (depth)}
+#'   \item{array an array or list of arrays, possibly degenerate to a matrix}
+#'   \item{stars a stars object, possibly with band (time) and z (depth)}
 #' }
 get_var <- function(x,
                     var = get_varnames(x),

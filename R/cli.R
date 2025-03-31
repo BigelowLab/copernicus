@@ -21,7 +21,7 @@ squote = function(x, fancy = FALSE){
 #' @param dataset_id char, the data set identifier such as 'cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m'
 #' @param product chr the product family such as "global-analysis-forecast-phy-001-024"
 #' @param vars char, a vector of one or more variables such as c("uo", "vo")
-#' @param bb \code{\link[sf]{bbox}} or named numeric vector, either a \code{\link[sf]{bbox}} or 
+#' @param bb [sf](bbox) or named numeric vector, either a [sf](bbox) or 
 #'    a 4 element named vector with "xmin", "xmax", "ymin" and "ymax" named elements
 #' @param time POSIXct, Date or character, start and stop times
 #' @param depth numeric of NULL, two element vector of min and max depths

@@ -27,7 +27,7 @@ build_cli_subset(
 
 \item{vars}{char, a vector of one or more variables such as c("uo", "vo")}
 
-\item{bb}{\code{\link[sf]{bbox}} or named numeric vector, either a \code{\link[sf]{bbox}} or 
+\item{bb}{[sf](bbox) or named numeric vector, either a [sf](bbox) or 
 a 4 element named vector with "xmin", "xmax", "ymin" and "ymax" named elements}
 
 \item{depth}{numeric of NULL, two element vector of min and max depths}

@@ -4,10 +4,12 @@
 \alias{get_copernicus_app}
 \title{Retrieve `copernicusmarine` app}
 \usage{
-get_copernicus_app(x = "copernicusmarine", filename = "~/.copernicusapp")
+get_copernicus_app(filename = "~/.copernicusapp", default = "copernicusmarine")
 }
 \arguments{
 \item{filename}{the name the file}
+
+\item{default}{chr the default to use if the file isn't found}
 }
 \value{
 chr the known app (with path)

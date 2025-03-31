@@ -13,7 +13,7 @@ get_lat(x)
 
 get_depth(x)
 
-get_loc(x, what = "time", ...)
+get_loc(x, what = "time")
 }
 \arguments{
 \item{x}{ncdf4 object}

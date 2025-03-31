@@ -16,5 +16,8 @@ Imports:
   sf,
   stars,
   readr,
-  twinkle
+  twinkle,
+  tidyr
+Suggests:
+  fs
 RoxygenNote: 7.3.2

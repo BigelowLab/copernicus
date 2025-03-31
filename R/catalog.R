@@ -93,6 +93,7 @@ dataset_period = function(x = c("cmems_mod_glo_phy_anfc_0.083deg_P1D-m",
 #' 
 #' @export
 #' @param filename chr the path to the file
+#' @param tabulate logical, if TRUE transform to a table
 #' @return a named list of json element
 read_dataset_catalog = function(filename = copernicus_path("catalogs/all_products_and_datasets.json"),
                                 tabulate = TRUE){
@@ -113,8 +114,8 @@ read_dataset_catalog = function(filename = copernicus_path("catalogs/all_product
 #' @param x nested catalog table
 #' @return a flattened tables
 flatten_product = function(x = read_product_catalog() |>
-                            dplyr::filter(product_id == "GLOBAL_ANALYSISFORECAST_PHY_001_024",
-                                          grepl("P1D", dataset_id, fixed = TRUE))){
+                            dplyr::filter(.data$product_id == "GLOBAL_ANALYSISFORECAST_PHY_001_024",
+                                          grepl("P1D", .data$dataset_id, fixed = TRUE))){
  tidyr::unnest(x, cols = dplyr::everything())
 }
 
@@ -150,6 +151,7 @@ tabulate_product_catalog = function(x = read_product_catalog()){
 #' 
 #' @export
 #' @param filename chr the path to the file
+#' @param tabulate logical, if TRUE transform to a table
 #' @return a named list of json element
 read_product_catalog = function(filename = copernicus_path("catalogs/all_products.json"),
                                 tabulate = TRUE){

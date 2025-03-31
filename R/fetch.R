@@ -32,8 +32,8 @@ fetch_copernicus = function(use = c("cli", "script")[1],
 #' @param ... other arguments for [fetch_copernicus_cli_subset]
 #' @return list of stars objects (one for each dataset) possibly with NULLs for unknown datasets
 fetch_product_by_day = function(p = product_lut() |>
-                                  dplyr::filter(fetch == "yes",
-                                                product_id == .data$product_id[1]),
+                                  dplyr::filter(.data$fetch == "yes",
+                                                .data$product_id == .data$product_id[1]),
                                 x = Sys.Date()-7,
                                 bb = c(xmin = -180, ymin = -90, 
                                        xmax = 180, ymax = 90) |>
@@ -45,7 +45,7 @@ fetch_product_by_day = function(p = product_lut() |>
     dplyr::group_by(.data$dataset_id)
   
   p |>
-    group_map(
+    dplyr::group_map(
       function(tbl, key){
         switch(key$dataset_id,
                "cmems_mod_glo_phy_anfc_0.083deg_P1D-m" = {
@@ -115,7 +115,7 @@ fetch_product_by_day = function(p = product_lut() |>
                  s
                },
                "cmems_mod_glo_phy-wcur_anfc_0.083deg_P1D-m" = {
-                 s = try(etch_copernicus_cli_subset(dataset_id = key$dataset_id,
+                 s = try(fetch_copernicus_cli_subset(dataset_id = key$dataset_id,
                                              product = tbl$product_id[1],
                                              vars = tbl$short_name,
                                              time = dates,
@@ -142,5 +142,5 @@ fetch_product_by_day = function(p = product_lut() |>
                  NULL
                })
       }) |>
-    rlang::set_names(dplyr::group_data(p) |> pull(1))
+    rlang::set_names(dplyr::group_data(p) |> dplyr::pull(1))
 }

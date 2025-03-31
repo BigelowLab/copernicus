@@ -5,7 +5,8 @@
 \title{A convenience tool for fetching a product suite on a given day.}
 \usage{
 fetch_product_by_day(
-  p = dplyr::filter(product_lut(), fetch == "yes", product_id == .data$product_id[1]),
+  p = dplyr::filter(product_lut(), .data$fetch == "yes", .data$product_id ==
+    .data$product_id[1]),
   x = Sys.Date() - 7,
   bb = sf::st_bbox(c(xmin = -180, ymin = -90, xmax = 180, ymax = 90), crs = 4326),
   ...

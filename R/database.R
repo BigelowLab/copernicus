@@ -76,11 +76,21 @@ decompose_filename = function(x = c("cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__
 #' @param ... other arguments for \code{\link{decompose_filename}}
 #' @return tibble database
 build_database <- function(path, pattern = "*.tif", 
-                           save_db = FALSE, ...){
+                           save_db = FALSE, 
+                           ...){
   if (missing(path)) stop("path is required")
-  db = list.files(path[1], pattern = utils::glob2rx(pattern),
-             recursive = TRUE, full.names = TRUE) |>
-    decompose_filename(...)
+  if (requireNamespace("fs", quietly = TRUE)){
+    db = fs::dir_ls(path[1],
+                     regexp = utils::glob2rx(pattern),
+                     recurse = TRUE,
+                     type = "file") |>
+      decompose_filename(...)
+  } else {
+    db = list.files(path[1], pattern = utils::glob2rx(pattern),
+                    recursive = TRUE, full.names = TRUE) |>
+      decompose_filename(...)
+  }
+ 
   if (save_db) db = write_database(db, path)
   return(db)
 }
@@ -183,4 +193,21 @@ missing_records = function(x,
   dr = range(x$date)
   dd = seq(from = dr[1], to = dr[2], by = by)
   dd[!(dd %in% x$date)]
+}
+
+
+#' Retrieve a list of databases
+#' 
+#' @export
+#' @param path chr, the root data directory
+#' @param pattern chr, database filename regex pattern to search for
+#' @return database paths relative to the root path
+list_databases = function(path = copernicus_path(),
+                          pattern = "^database$"){
+  if (requireNamespace("fs", quietly = TRUE)){
+    ff = fs::dir_ls(path, regexp = pattern, recurse = TRUE, type = "file")
+  } else {
+    ff = list.files(path, pattern = pattern, full.names = TRUE, recursive = TRUE)
+  }
+  sub(paste0(path,.Platform$file.sep), "", dirname(ff))
 }

@@ -5,8 +5,8 @@
 \title{Flatten a particular product suite into one large table}
 \usage{
 flatten_product(
-  x = dplyr::filter(read_product_catalog(), product_id ==
-    "GLOBAL_ANALYSISFORECAST_PHY_001_024", grepl("P1D", dataset_id, fixed = TRUE))
+  x = dplyr::filter(read_product_catalog(), .data$product_id ==
+    "GLOBAL_ANALYSISFORECAST_PHY_001_024", grepl("P1D", .data$dataset_id, fixed = TRUE))
 )
 }
 \arguments{

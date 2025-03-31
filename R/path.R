@@ -113,12 +113,13 @@ set_copernicus_app <- function(x = "copernicusmarine",
 #'
 #' @export
 #' @param filename the name the file
+#' @param default chr the default to use if the file isn't found
 #' @return chr the known app (with path)
-get_copernicus_app <- function(x = "copernicusmarine",
-                               filename = "~/.copernicusapp"){
+get_copernicus_app <- function(filename = "~/.copernicusapp",
+                               default = "copernicusmarine"){
   if (!file.exists(filename[1])){
     warning("credentials file not found:", filename[1])
-    app = "copernicusmarine"
+    app = default
   } else {
     app = readLines(filename[1])
   }

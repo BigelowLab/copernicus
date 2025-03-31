@@ -13,10 +13,10 @@ get_var_array(x, var, index, collapse_degen = FALSE)
 
 \item{index}{named list of \code{[start,length]} vectors for each dimension
 \itemize{
-\item{lon}{such as c(1,913)}
-\item{lat}{such as c(1,443)}
-\item{time}{such as c(5, 7) which starts on the 5th and ends on the 12th}
-\item{depth}{such as c(8,1) which retrieves just the 8th depth}
+\item{lon, such as c(1,913)}
+\item{lat, such as c(1,443)}
+\item{time, such as c(5, 7) which starts on the 5th and ends on the 12th}
+\item{depth, such as c(8,1) which retrieves just the 8th depth}
 }}
 
 \item{collapse_degen}{logical, if FALSE then preserve length 1 dimensions

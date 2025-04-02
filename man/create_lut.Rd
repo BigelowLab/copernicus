@@ -2,16 +2,25 @@
 % Please edit documentation in R/lut.R
 \name{create_lut}
 \alias{create_lut}
-\title{Given a NCDF object (or path to one) create a variable lookup table (LUT)}
+\title{Generate a LUT suitable for the package}
 \usage{
-create_lut(x)
+create_lut(
+  x = "GLOBAL_ANALYSISFORECAST_BGC_001_028",
+  prod = read_product_catalog(),
+  save_lut = TRUE
+)
 }
 \arguments{
-\item{x}{ncdf4 object or path to one, if the latter we will open and then close it}
+\item{x}{chr the name of the product}
+
+\item{prod}{table of products (unflattened)}
+
+\item{save_lut}{log, if TRUE save to CSV format in `inst/lut`}
 }
 \value{
-tibble LUT of \code{name}, \code{longname} and \code{units}
+a table of look up values.  You'll edit this file to decide whihc to fetch
+ and what depths to fetch from.
 }
 \description{
-Given a NCDF object (or path to one) create a variable lookup table (LUT)
+Generate a LUT suitable for the package
 }

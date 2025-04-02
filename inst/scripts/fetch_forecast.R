@@ -16,7 +16,7 @@
 #
 # fetch_copernicus
 #   download file, open file, read as stars, close file, delete file
-# save by slice var <prod>/nwa/yyyy/mmdd/date_var_depth.tif
+# save by slice var <reg>/<prod>/yyyy/mmdd/date_var_depth.tif
 # append database and write
 
 suppressPackageStartupMessages({
@@ -89,7 +89,7 @@ main = function(date = Sys.Date(), cfg = NULL){
   P = copernicus::product_lut(cfg$product) |>
     dplyr::filter(fetch == "yes")
 
-  out_path <- copernicus::copernicus_path(cfg$product, cfg$region)
+  out_path <- copernicus::copernicus_path(cfg$region, cfg$product)
   
   
   db = P |>

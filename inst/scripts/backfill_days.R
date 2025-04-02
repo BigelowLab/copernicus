@@ -32,8 +32,8 @@ fetch_this_day = function(date, cfg, data_path, P){
   #daynum = format(date, "%d")
   #if (daynum == "01") charlier::info("backfill_days:fetching %s", format(date, "%Y-%b"))
   
-  out_path <- copernicus::copernicus_path(cfg$product, 
-                                          cfg$region, 
+  out_path <- copernicus::copernicus_path(cfg$region, 
+                                          cfg$product, 
                                           format(date, "%Y"),
                                           format(date, "%m%d"))
   ss = try( P |>
@@ -81,14 +81,14 @@ main = function(cfg = NULL){
     dplyr::filter(fetch == "yes") |>
     dplyr::group_by(product_id)
   
-  data_path = copernicus::copernicus_path(cfg$product,  cfg$region)
+  data_path = copernicus::copernicus_path(cfg$region, cfg$product)
   ok = make_path(data_path)
   start_date = as.Date(cfg$first_date)
   end_date = Sys.Date()
   all_dates = seq(from = start_date, to = end_date, by = "day")
   
-  if (file.exists(copernicus::copernicus_path(cfg$product, 
-                                              cfg$region, 
+  if (file.exists(copernicus::copernicus_path(cfg$region,
+                                              cfg$product,
                                               "database"))){
     DB = read_database(data_path)
     missing_dates <- all_dates[!(all_dates %in% DB$date)]
@@ -131,7 +131,7 @@ Args = argparser::arg_parser("Backfill copernicus data",
 
 cfg = yaml::read_yaml(Args$config)
 cfg$bb = cofbb::get_bb(cfg$region)
-charlier::start_logger(copernicus_path(cfg$product, cfg$reg, "log"))
+charlier::start_logger(copernicus_path(cfg$reg, cfg$product, "log"))
 charlier::info("backfill_days for %s", cfg$product)
 
 MAX_MISSED_COUNT = 3

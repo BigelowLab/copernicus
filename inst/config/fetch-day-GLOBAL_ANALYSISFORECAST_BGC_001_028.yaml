@@ -1,0 +1,4 @@
+region: nwa
+product: GLOBAL_ANALYSISFORECAST_BGC_001_028
+first_date: 2022-06-01
+log_level: ERROR

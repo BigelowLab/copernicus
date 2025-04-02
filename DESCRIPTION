@@ -19,5 +19,6 @@ Imports:
   twinkle,
   tidyr
 Suggests:
-  fs
+  fs,
+  httr
 RoxygenNote: 7.3.2

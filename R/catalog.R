@@ -163,3 +163,17 @@ read_product_catalog = function(filename = copernicus_path("catalogs/all_product
   if (tabulate) x = tabulate_product_catalog(x)
   return(x)
 }
+
+
+#' Browse a product by id
+#' 
+#' @param product chr, the product id
+#' @return hmmm, whatever [httr](BROWSE) returns
+browse_product = function(product = "GLOBAL_ANALYSISFORECAST_BGC_001_028"){
+  if (!requireNamespace("httr")){
+    stop("please install the httr first")
+  }
+  tmp = "https://data.marine.copernicus.eu/PRODUCT_ID/description"
+  tmp = gsub("PRODUCT_ID", product[1], tmp, fixed = TRUE)
+  httr::BROWSE(tmp)
+}

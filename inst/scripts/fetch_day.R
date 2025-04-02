@@ -33,11 +33,10 @@ main = function(date = Sys.Date()-1, cfg = NULL){
     dplyr::filter(fetch == "yes") |>
     dplyr::group_by(product_id)
   
-  data_path = out_path <- copernicus::copernicus_path(cfg$product, 
-                                                      cfg$region)
-  # productid/region/yyyy/mmdd/datasetid__time_depth_period_var_treatment.ext
-  out_path <- copernicus::copernicus_path(cfg$product, 
-                                          cfg$region, 
+  data_path = out_path <- copernicus::copernicus_path(cfg$region, cfg$product)
+  # reg/prod/yyyy/mmdd/datasetid__time_depth_period_var_treatment.ext
+  out_path <- copernicus::copernicus_path(cfg$region, 
+                                          cfg$product, 
                                           format(date, "%Y"),
                                           format(date, "%m%d"))
   ss = P |>

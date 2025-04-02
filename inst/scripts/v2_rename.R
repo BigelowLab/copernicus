@@ -1,6 +1,7 @@
 # one time renaming of the files into the pattern
 # date_period_var_depth_treatment.tif
 
+stop("do not run this unless you know what is going on")
 suppressPackageStartupMessages({
   library(rlang)
   library(copernicus)

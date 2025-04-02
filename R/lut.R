@@ -15,31 +15,27 @@ product_lut = function(product_id = 'GLOBAL_ANALYSISFORECAST_PHY_001_024'){
 
 
 
-#' Given a NCDF object (or path to one) create a variable lookup table (LUT)
+#' Generate a LUT suitable for the package
 #' 
 #' @export
-#' @param x ncdf4 object or path to one, if the latter we will open and then close it
-#' @return tibble LUT of \code{name}, \code{longname} and \code{units}
-create_lut <- function(x){
+#' @param x chr the name of the product
+#' @param prod table of products (unflattened)
+#' @param save_lut log, if TRUE save to CSV format in `inst/lut`
+#' @return a table of look up values.  You'll edit this file to decide whihc to fetch
+#'  and what depths to fetch from.  
+create_lut <- function(x = "GLOBAL_ANALYSISFORECAST_BGC_001_028",
+                       prod = read_product_catalog(),
+                       save_lut = TRUE){
   
-  close_me = FALSE
-  if (!inherits(x, 'ncdf4')){
-    x = ncdf4::nc_open(x)
-    close_me = TRUE
-  }
-  
-  # name,longname,units
-  name <- names(x$var)
-  longname = sapply(name,
-        function(nm) x$var[[nm]]$longname)
-  units = sapply(name,
-                 function(nm) x$var[[nm]]$units)
-  if (close_me) ncdf4::nc_close(x)
-  
-  dplyr::tibble(
-    name = name,
-    longname = unname(longname),
-    units = unname(units))
+  lut = prod |>
+    dplyr::filter(product_id == x[1]) |>
+    flatten_product() |>
+    dplyr::mutate(depth = "sur", 
+                  fetch = "no",
+                  mindepth = 0,
+                  maxdepth = 1)
+  if (save_lut) readr::write_csv(lut, file.path("inst/lut/", paste0(x,".csv")))
+  lut
 }
 
 #' Read a regional LUT ala ("nwa_lut.csv")

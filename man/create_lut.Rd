@@ -6,14 +6,14 @@
 \usage{
 create_lut(
   x = "GLOBAL_ANALYSISFORECAST_BGC_001_028",
-  prod = read_product_catalog(),
-  save_lut = TRUE
+  catalog = read_product_catalog(),
+  save_lut = FALSE
 )
 }
 \arguments{
 \item{x}{chr the name of the product}
 
-\item{prod}{table of products (unflattened)}
+\item{catalog}{table of products (unflattened)}
 
 \item{save_lut}{log, if TRUE save to CSV format in `inst/lut`}
 }

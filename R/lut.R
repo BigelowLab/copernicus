@@ -8,8 +8,10 @@ product_lut = function(product_id = 'GLOBAL_ANALYSISFORECAST_PHY_001_024'){
   filename = system.file(file.path("lut", paste0(product_id[1], ".csv")),
                          package = "copernicus")
   x = readr::read_csv(filename, show_col_types = FALSE) 
-  ix = x$short_name == "sea_surface_temperature_anomaly"
-  x$short_name[ix] = "sstanom"
+  if ("shortname" %in% colnames(x)){
+    ix = x$short_name == "sea_surface_temperature_anomaly"
+    x$short_name[ix] = "sstanom"
+  }
   x
 }
 
@@ -19,15 +21,15 @@ product_lut = function(product_id = 'GLOBAL_ANALYSISFORECAST_PHY_001_024'){
 #' 
 #' @export
 #' @param x chr the name of the product
-#' @param prod table of products (unflattened)
+#' @param catalog table of products (unflattened)
 #' @param save_lut log, if TRUE save to CSV format in `inst/lut`
 #' @return a table of look up values.  You'll edit this file to decide whihc to fetch
 #'  and what depths to fetch from.  
 create_lut <- function(x = "GLOBAL_ANALYSISFORECAST_BGC_001_028",
-                       prod = read_product_catalog(),
-                       save_lut = TRUE){
+                       catalog = read_product_catalog(),
+                       save_lut = FALSE){
   
-  lut = prod |>
+  lut = catalog |>
     dplyr::filter(product_id == x[1]) |>
     flatten_product() |>
     dplyr::mutate(depth = "sur", 

@@ -30,3 +30,9 @@ x = readr::read_csv(ff,
   dplyr::mutate(start_date = NA_character_, end_date = NA_character_) |>
   readr::write_csv(file.path(path, "dataset_metadata.csv"))
 
+
+
+X = read_product_catalog() |>
+  select(product_id, dataset_id) |>
+  filter(grepl("GLOBAL", .data$product_id), grepl("myint", .data$dataset_id)) |>
+  distinct()

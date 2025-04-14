@@ -36,8 +36,11 @@ fetch_this_day = function(date, cfg, data_path, P){
                                           cfg$product, 
                                           format(date, "%Y"),
                                           format(date, "%m%d"))
+  
+  MISSED_COUNT = 0
+
   ss = try( P |>
-    fetch_product_by_day(x = date, bb = cfg$bb))
+              fetch_product_by_day(x = date, bb = cfg$bb))
   if (inherits(ss, "try-error")){
     MISSED_COUNT <<- MISSED_COUNT + 1
     charlier::warn("backfill_days: failed to fetch %s", format(date, "%Y-%m-%d"))
@@ -50,6 +53,7 @@ fetch_this_day = function(date, cfg, data_path, P){
     charlier::warn("backfill_days: unable to fetch %s", format(date, "%Y-%m-%d"))
     return(NULL)
   }
+
   
   ff = lapply(names(ss),
               function(dataset){
@@ -76,13 +80,23 @@ fetch_this_day = function(date, cfg, data_path, P){
 }
 
 main = function(cfg = NULL){
-  
+  ss = product_lut("dataset_metadata")
   P = copernicus::product_lut(cfg$product) |>
     dplyr::filter(fetch == "yes") |>
-    dplyr::group_by(product_id)
+    dplyr::group_by(dplyr::all_of(c("product_id", "dataset_id")))
   
-  data_path = copernicus::copernicus_path(cfg$region, cfg$product)
-  ok = make_path(data_path)
+  data_path = copernicus::copernicus_path(cfg$region, cfg$product) |>
+    copernicus::make_path()
+  
+  
+  
+  newdb = dplyr::group_map(P,
+    function(p){
+      start_date = as.Date(cfg$first_date)
+      end_date = Sys.Date()
+      all_dates = seq(from = start_date, to = end_date, by = "day")
+    })
+  
   start_date = as.Date(cfg$first_date)
   end_date = Sys.Date()
   all_dates = seq(from = start_date, to = end_date, by = "day")
@@ -124,8 +138,8 @@ Args = argparser::arg_parser("Backfill copernicus data",
                              hide.opts = TRUE) |>
   add_argument("--config",
                help = 'configuration file',
-               default = system.file("config/fetch-day-GLOBAL_MULTIYEAR_PHY_001_030.yaml", 
-                                     package = "copernicus", lib.loc = .libPaths()[1])) |>
+               default = copernicus_path("config", 
+                                         "fetch-day-GLOBAL_MULTIYEAR_PHY_001_030.yaml")) |>
   parse_args()
 
 
@@ -135,7 +149,7 @@ charlier::start_logger(copernicus_path(cfg$reg, cfg$product, "log"))
 charlier::info("backfill_days for %s", cfg$product)
 
 MAX_MISSED_COUNT = 3
-MISSED_COUNT = 0
+META = copernicus::product_lut("dataset_metadata")
 
 if (!interactive()){
   ok = main( cfg )

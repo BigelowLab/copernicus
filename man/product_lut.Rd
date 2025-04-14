@@ -4,10 +4,15 @@
 \alias{product_lut}
 \title{Read a product LUT}
 \usage{
-product_lut(product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_024")
+product_lut(
+  product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
+  add_meta = TRUE
+)
 }
 \arguments{
 \item{product_id}{char, the product identifier}
+
+\item{add_meta}{logical, if TRUE merge with `dataset_metadata`}
 }
 \value{
 tibble

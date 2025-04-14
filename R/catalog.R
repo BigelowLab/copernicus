@@ -1,3 +1,187 @@
+#' Fetch the description for a dataset
+#' 
+#' @export
+#' @param dataset_id chr, the dataset to describe
+#' @param app chr, the `copernicusmarine` app
+#' @param ofile chr, the name of the file to save with thr response content
+#' @return 0 for success non-zero otherwise
+fetch_dataset_description = function(dataset_id = "cmems_mod_glo_phy_myint_0.083deg_P1D-m",
+                                     app = get_copernicus_app(),
+                                     ofile = copernicus_path("catalogs",
+                                                             sprintf("%s.json", dataset_id[1]))){
+  cmd = sprintf("describe --disable-progress-bar --log-level ERROR --dataset-id %s > %s",
+                dataset_id[1], ofile)
+  system2(app, cmd)
+}
+
+
+#' Read the description for a dataset
+#' 
+#' @export
+#' @param dataset_id chr, the dataset description to read
+#' @param tabulate logical, if TRUE trasnform from list to nested table
+#' @param flatten logical, if TRUE then flatten nested table (ignored if `tabulate = FALSE`)
+#' @param service_name chr, if tabulating then the name of the service to tabulate. 
+#'   The default is used by the CLI.
+#' @param path chr the copernicus data path
+#' @param fetch logical, if TRUE and the data was not previously downloaded, then
+#'   try to fetch the data
+#' @param x NULL or list, if not NULL then a list for a single dataset.  In this 
+#'   case no attempt is made to read the file.
+#' @return list, nested table or flat table
+read_dataset_description = function(dataset_id = "cmems_mod_glo_phy_myint_0.083deg_P1D-m",
+                                    tabulate = TRUE,
+                                    flatten = TRUE,
+                                    service_name = "arco-geo-series",
+                                    path = copernicus_path("catalogs"),
+                                    fetch = TRUE,
+                                    x = NULL){
+  
+  if (is.null(x)){
+    filename = file.path(path, sprintf("%s.json", dataset_id[1]))
+    if(!file.exists(filename) && fetch) {
+      ok = fetch_dataset_description(dataset_id[1])
+      if (ok != 0) stop("unable to fetch the dataset description before reading")
+    }
+    x = jsonlite::read_json(filename)
+  }
+  
+  if (tabulate){
+    # x.products[0].datasets[0].versions[0].parts[0].services
+    x = x[['products']][[1]][["datasets"]][[1]][["versions"]][[1]][["parts"]][[1]][['services']]
+    names(x) <- sapply(x, function(subx) subx[['service_name']])
+    x = x[[service_name[1]]][['variables']]
+    if (flatten){
+      x = flatten_variables(x, dataset_id = dataset_id)
+      #if (!is.null(x)) x = dplyr::mutate(x, dataset_id = dataset_id, .before = 1)
+      #short_name = sapply(x, "[[", "short_name")
+      #standard_name = sapply(x, "[[", "standard_name")
+      #units = sapply(x, "[[", "units")
+      #origin = as.POSIXct("1970-01-01 00:00:00Z", tz = "UTC")
+      #time = lapply(x, function(subx){
+      #                y = subx[['coordinates']]
+      #                names(y) <- sapply(y, `[[`, "coordinate_id")
+      #                y = y[['time']]
+      #                if ("minimum_value" %in% names(y)){
+      #                  r = c(y[["minimum_value"]], y[['maximum_value']], y[['step']]) |>
+      #                    as.numeric()
+      #                } else {
+      #                  values = sapply(y$values, `[[`, 1) |> as.numeric() 
+      #                  r = range(values)
+      #                  step = (r[2] - r[1])/length(values)
+      #                  c(r, step)
+      #                }
+      #                r
+      #                })
+      #time = do.call(rbind, time)
+      #step = time[,3]/1000
+      #time = as.POSIXct(time[,1:2]/1000, origin = origin, tz = "UTC")
+      #
+      #x = dplyr::tibble(dataset_id = dataset_id[1],
+      #              short_name = sapply(x, "[[", "short_name"),
+      #              standard_name = sapply(x, "[[", "standard_name"),
+      #              units = sapply(x, "[[", "units"),
+      #              start_time = time[,1],
+      #              end_time = time[,2],
+      #              time_step = step)
+    }  else { # flatten
+    x = dplyr::mutate(x, dataset_id = dataset_id, .before = 1)
+    }
+  } # tabulate
+  
+  x
+}
+
+#' Flatten a dataset `variables` element
+#' 
+#' @export
+#' @param x a `variables` node
+#' @return table or possibly filled with NAs if x is NULL
+flatten_variables = function(x, dataset_id = "unknown"){
+  if(is.null(x)) {
+    now = Sys.time() + NA
+    r = dplyr::tibble(
+      dataset_id = dataset_id[1],
+      short_name = NA_character_,
+      standard_name = NA_character_,
+      units = NA_character_,
+      start_time = now,
+      end_time = now,
+      time_step = NA_real_
+   ) 
+   return(r)
+  }
+  short_name = sapply(x, "[[", "short_name")
+  standard_name = sapply(x, "[[", "standard_name")
+  units = sapply(x, "[[", "units")
+  origin = as.POSIXct("1970-01-01 00:00:00Z", tz = "UTC")
+  time = lapply(x, function(subx){
+    y = subx[['coordinates']]
+    names(y) <- sapply(y, `[[`, "coordinate_id")
+    y = y[['time']]
+    if ("minimum_value" %in% names(y)){
+      r = c(y[["minimum_value"]], y[['maximum_value']], y[['step']]) |>
+        as.numeric()
+    } else {
+      values = sapply(y$values, `[[`, 1) |> as.numeric() 
+      r = range(values)
+      step = (r[2] - r[1])/length(values)
+      r = c(r, step)
+    }
+    r
+  })
+  time = if (length(time) == 1){
+    matrix(time[[1]], ncol = 3) 
+  } else {
+    do.call(rbind, time)
+  }
+  step = time[,3, drop = TRUE]/1000
+  time = as.POSIXct(time[,1:2, drop = FALSE]/1000, origin = origin, tz = "UTC")
+  
+  dplyr::tibble(dataset_id = dataset_id[1],
+                short_name = sapply(x, "[[", "short_name"),
+                standard_name = sapply(x, "[[", "standard_name"),
+                units = sapply(x, "[[", "units"),
+                start_time = time[,1],
+                end_time = time[,2],
+                time_step = step)
+}
+
+
+
+#' Read a dataset service description as a table
+#' 
+#' @param x a dataset node
+#' @param flatten logical if TRUE then flatten otherwise return nested table
+#' @return table possibly nested or flattened
+read_dataset_service = function(x, flatten = TRUE){
+  x = x[['variables']]
+  if (flatten){
+    short_name = sapply(x, "[[", "short_name")
+    standard_name = sapply(x, "[[", "standard_name")
+    units = sapply(x, "[[", "units")
+    origin = as.POSIXct("1970-01-01 00:00:00Z", tz = "UTC")
+    time = lapply(x, function(subx){
+      y = subx[['coordinates']]
+      names(y) <- sapply(y, `[[`, "coordinate_id")
+      y = y[['time']]
+      c(y[["minimum_value"]], y[['maximum_value']], y[['step']]) |>
+        as.numeric()
+    })
+    time = do.call(rbind, time)
+    step = time[,3]/1000
+    time = as.POSIXct(time[,1:2]/1000, origin = origin, tz = "UTC")
+    
+    x = dplyr::tibble(short_name = sapply(x, "[[", "short_name"),
+                  standard_name = sapply(x, "[[", "standard_name"),
+                  units = sapply(x, "[[", "units"),
+                  start_time = time[,1],
+                  end_time = time[,2],
+                  time_step = step / 3600)
+  } 
+  x
+}
+
 #' Fetch catalog
 #' 
 #' @export
@@ -107,6 +291,67 @@ read_dataset_catalog = function(filename = copernicus_path("catalogs/all_product
 }
 
 ## ----------------dataset(s) above and product(s) below --------------------- ##
+
+#' Fetch the description for a product
+#' 
+#' @export
+#' @param product_id chr, the product to describe
+#' @param app chr, the `copernicusmarine` app
+#' @param ofile chr, the name of the file to save with the response content
+#' @return 0 for success non-zero otherwise
+fetch_product_description = function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
+                                     app = get_copernicus_app(),
+                                     ofile = copernicus_path("catalogs",
+                                                             sprintf("%s.json", product_id[1]))){
+  cmd = sprintf("describe --disable-progress-bar --log-level ERROR --product-id %s > %s",
+                product_id[1], ofile)
+  system2(app, cmd)
+}
+
+#' Read the description for a product
+#' 
+#' @export
+#' @param product_id chr, the product description to read
+#' @param tabulate logical, if TRUE trasnform from list to nested table
+#' @param flatten logical, if TRUE then flatten nested table (ignored if `tabulate = FALSE`)
+#' @param service_name chr, if tabulating then the name of the service to tabulate. 
+#'   The default is used by the CLI.
+#' @param path chr the copernicus data path
+#' @param fetch logical, if TRUE and the data was not previously downloaded, then
+#'   try to fetch the data
+#' @return list, nested table or flat table
+read_product_description = function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
+                                    tabulate = TRUE,
+                                    flatten = TRUE,
+                                    service_name = "arco-geo-series",
+                                    path = copernicus_path("catalogs"),
+                                    fetch = TRUE,
+                                    x = NULL){
+  
+  if (is.null(x)){
+    filename = file.path(path, sprintf("%s.json", product_id[1]))
+    if(!file.exists(filename) && fetch) {
+      ok = fetch_product_description(product_id[1])
+      if (ok != 0) stop("unable to fetch the product description before reading")
+    }
+    x = jsonlite::read_json(filename)
+  }
+  if (tabulate){
+    x = x[['products']][[1]][["datasets"]]
+    names(x) <- sapply(x, "[[", "dataset_id")
+    x = lapply(names(x),
+                function(nm){
+                  cat("dataset_id", nm, "\n")
+                  y = x[[nm]][['versions']][[1]][["parts"]][[1]][['services']]
+                  names(y) <- sapply(y, "[[", "service_name")
+                  r = flatten_variables(y[[service_name]][["variables"]],
+                                        dataset_id = nm)
+                  r
+                }) |>
+      dplyr::bind_rows()
+  }
+  x
+}
 
 #' Flatten a particular product suite into one large table
 #' 

@@ -79,7 +79,7 @@ Args = argparser::arg_parser("Fetch copernicus data for one day",
                type = "charcacter") |>
   add_argument("--config",
                help = 'configuration file',
-               default = system.file("config/fetch-day-GLOBAL_MULTIYEAR_PHY_001_030.yaml", package = "copernicus")) |>
+               default = copernicus_path("config","fetch-day-GLOBAL_MULTIYEAR_PHY_001_030.yaml", package = "copernicus")) |>
   parse_args()
 
 

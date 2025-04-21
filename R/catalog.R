@@ -51,42 +51,13 @@ read_dataset_description = function(dataset_id = "cmems_mod_glo_phy_myint_0.083d
     x = x[['products']][[1]][["datasets"]][[1]][["versions"]][[1]][["parts"]][[1]][['services']]
     names(x) <- sapply(x, function(subx) subx[['service_name']])
     x = x[[service_name[1]]][['variables']]
-    if (flatten){
-      x = flatten_variables(x, dataset_id = dataset_id)
-      #if (!is.null(x)) x = dplyr::mutate(x, dataset_id = dataset_id, .before = 1)
-      #short_name = sapply(x, "[[", "short_name")
-      #standard_name = sapply(x, "[[", "standard_name")
-      #units = sapply(x, "[[", "units")
-      #origin = as.POSIXct("1970-01-01 00:00:00Z", tz = "UTC")
-      #time = lapply(x, function(subx){
-      #                y = subx[['coordinates']]
-      #                names(y) <- sapply(y, `[[`, "coordinate_id")
-      #                y = y[['time']]
-      #                if ("minimum_value" %in% names(y)){
-      #                  r = c(y[["minimum_value"]], y[['maximum_value']], y[['step']]) |>
-      #                    as.numeric()
-      #                } else {
-      #                  values = sapply(y$values, `[[`, 1) |> as.numeric() 
-      #                  r = range(values)
-      #                  step = (r[2] - r[1])/length(values)
-      #                  c(r, step)
-      #                }
-      #                r
-      #                })
-      #time = do.call(rbind, time)
-      #step = time[,3]/1000
-      #time = as.POSIXct(time[,1:2]/1000, origin = origin, tz = "UTC")
-      #
-      #x = dplyr::tibble(dataset_id = dataset_id[1],
-      #              short_name = sapply(x, "[[", "short_name"),
-      #              standard_name = sapply(x, "[[", "standard_name"),
-      #              units = sapply(x, "[[", "units"),
-      #              start_time = time[,1],
-      #              end_time = time[,2],
-      #              time_step = step)
-    }  else { # flatten
-    x = dplyr::mutate(x, dataset_id = dataset_id, .before = 1)
-    }
+    x = if (flatten){
+        # flatten
+        flatten_variables(x, dataset_id = dataset_id)
+      }  else { 
+        # nested
+        dplyr::mutate(x, dataset_id = dataset_id, .before = 1)
+      }
   } # tabulate
   
   x

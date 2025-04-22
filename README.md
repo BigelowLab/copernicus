@@ -137,49 +137,56 @@ copernicus::get_copernicus_app()
 
 You can download a product catalog for local storage.
 
-    ok = copernicus::fetch_product_catalog()
+``` r
+suppressPackageStartupMessages({
+  library(copernicus)
+  library(stars)
+})
+
+ok = copernicus::fetch_product_catalog(product_id = "GLOBAL_ANALYSISFORECAST_BGC_001_028")
+```
 
 This downloads into a “catalogs” directory within your data directory
 Now read it in.
 
 ``` r
-x = copernicus::read_product_catalog()
+x = copernicus::read_product_catalog(product_id = "GLOBAL_ANALYSISFORECAST_BGC_001_028")
 x
 ```
 
-    ## # A tibble: 1,176 × 5
-    ##    product_id                             title dataset_id dataset_name vars    
-    ##    <chr>                                  <chr> <chr>      <chr>        <list>  
-    ##  1 ANTARCTIC_OMI_SI_extent                Anta… antarctic… Sea Ice Ext… <tibble>
-    ##  2 ANTARCTIC_OMI_SI_extent_obs            Anta… antarctic… Southern He… <tibble>
-    ##  3 ARCTIC_ANALYSISFORECAST_BGC_002_004    Arct… cmems_mod… Arctic Ocea… <tibble>
-    ##  4 ARCTIC_ANALYSISFORECAST_BGC_002_004    Arct… cmems_mod… Arctic Ocea… <tibble>
-    ##  5 ARCTIC_ANALYSISFORECAST_PHY_002_001    Arct… cmems_mod… Arctic Ocea… <tibble>
-    ##  6 ARCTIC_ANALYSISFORECAST_PHY_002_001    Arct… cmems_mod… Arctic Ocea… <tibble>
-    ##  7 ARCTIC_ANALYSISFORECAST_PHY_002_001    Arct… cmems_mod… Arctic Ocea… <tibble>
-    ##  8 ARCTIC_ANALYSISFORECAST_PHY_002_001    Arct… cmems_mod… Arctic Ocea… <tibble>
-    ##  9 ARCTIC_ANALYSISFORECAST_PHY_ICE_002_0… Arct… cmems_mod… neXtSIM-F s… <tibble>
-    ## 10 ARCTIC_ANALYSISFORECAST_PHY_ICE_002_0… Arct… cmems_mod… cmems_mod_a… <NULL>  
-    ## # ℹ 1,166 more rows
+    ## # A tibble: 31 × 7
+    ##    product_id       title dataset_id dataset_name short_name standard_name units
+    ##    <chr>            <chr> <chr>      <chr>        <chr>      <chr>         <chr>
+    ##  1 GLOBAL_ANALYSIS… Glob… cmems_mod… daily mean … nppv       net_primary_… mg m…
+    ##  2 GLOBAL_ANALYSIS… Glob… cmems_mod… daily mean … o2         mole_concent… mmol…
+    ##  3 GLOBAL_ANALYSIS… Glob… cmems_mod… Monthly mea… nppv       net_primary_… mg m…
+    ##  4 GLOBAL_ANALYSIS… Glob… cmems_mod… Monthly mea… o2         mole_concent… mmol…
+    ##  5 GLOBAL_ANALYSIS… Glob… cmems_mod… daily mean … dissic     mole_concent… mol …
+    ##  6 GLOBAL_ANALYSIS… Glob… cmems_mod… daily mean … ph         sea_water_ph… 1    
+    ##  7 GLOBAL_ANALYSIS… Glob… cmems_mod… daily mean … talk       sea_water_al… mol …
+    ##  8 GLOBAL_ANALYSIS… Glob… cmems_mod… Monthly mea… dissic     mole_concent… mol …
+    ##  9 GLOBAL_ANALYSIS… Glob… cmems_mod… Monthly mea… ph         sea_water_ph… 1    
+    ## 10 GLOBAL_ANALYSIS… Glob… cmems_mod… Monthly mea… talk       sea_water_al… mol …
+    ## # ℹ 21 more rows
 
-This provides a nested table of available datasets along with tables of
-variables for each (if any). For example, the first row has the
-following variables table.
+By default this provides a flattened table of available datasets along
+with tables of variables for each (if any). Here’s the first dataset (a
+constituent of product suite)
 
 ``` r
-dplyr::slice(x, 1) |>
-  dplyr::pull(dplyr::all_of(vars))
+dplyr::filter(x, dataset_id %in% "cmems_mod_glo_bgc-bio_anfc_0.25deg_P1D-m") |>
+  dplyr::glimpse()
 ```
 
-    ## [[1]]
-    ## # A tibble: 5 × 3
-    ##   short_name     standard_name  units
-    ##   <chr>          <chr>          <chr>
-    ## 1 siextents_cglo sea_ice_extent km2  
-    ## 2 siextents_glor sea_ice_extent km2  
-    ## 3 siextents_mean sea_ice_extent km2  
-    ## 4 siextents_oras sea_ice_extent km2  
-    ## 5 siextents_std  sea_ice_extent km2
+    ## Rows: 2
+    ## Columns: 7
+    ## $ product_id    <chr> "GLOBAL_ANALYSISFORECAST_BGC_001_028", "GLOBAL_ANALYSISF…
+    ## $ title         <chr> "Global Ocean Biogeochemistry Analysis and Forecast", "G…
+    ## $ dataset_id    <chr> "cmems_mod_glo_bgc-bio_anfc_0.25deg_P1D-m", "cmems_mod_g…
+    ## $ dataset_name  <chr> "daily mean fields from Global Ocean Biogeochemistry Ana…
+    ## $ short_name    <chr> "nppv", "o2"
+    ## $ standard_name <chr> "net_primary_production_of_biomass_expressed_as_carbon_p…
+    ## $ units         <chr> "mg m-3 day-1", "mmol m-3"
 
 ## Which products? Which datasets?
 
@@ -192,6 +199,9 @@ subject to change).
 
 [GLOBAL_ANALYSISFORECAST_PHY_001_024](https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_PHY_001_024/description)
 31 Oct 2020 to 9 days from present (forecast)
+
+[GLOBAL_ANALYSISFORECAST_BGC_001_028](https://data.marine.copernicus.eu/product/GLOBAL_ANALYSISFORECAST_BGC_001_028/description)
+2021-10-01 to 9 days from present
 
 ## Fetching data
 
@@ -234,9 +244,9 @@ x
 
     ## stars object with 4 dimensions and 2 attributes
     ## attribute(s):
-    ##                Min.     1st Qu.        Median        Mean    3rd Qu.     Max.
-    ## uo [m/s] -1.2678599 -0.06923880 -0.0005947499 0.001666143 0.06905091 1.270773
-    ## vo [m/s] -0.4879295 -0.05941393 -0.0092028086 0.016247062 0.04970369 1.277342
+    ##                Min.     1st Qu.       Median         Mean    3rd Qu.     Max.
+    ## uo [m/s] -0.8798773 -0.07763755 -0.002414509 -0.007870006 0.05840731 1.534169
+    ## vo [m/s] -0.8442903 -0.05558647 -0.002378657  0.028312241 0.05098823 1.805341
     ##           NA's
     ## uo [m/s] 26800
     ## vo [m/s] 26800
@@ -245,173 +255,10 @@ x
     ## x        1 109         -72.04  0.08333      NA [x]
     ## y        1  85          46.04 -0.08333      NA [y]
     ## depth    1   1      0.494 [m]       NA      NA    
-    ## time     1  10 2025-03-28 UTC   1 days POSIXct
-
-We can plot a subset of these using base graphics and the `[` function.
-`stars` objects are indexed first by the attribute (variable) followed
-by the dimensions. In this case the index order is \[`attribute`, `x`,
-`y`, `depth`, `time`\] or \[`attribute`, `x`, `y`, `time`\] for
-single-depth objects.
+    ## time     1  10 2025-04-22 UTC   1 days POSIXct
 
 ``` r
-plot(dplyr::slice(x, "depth", 1) )
+plot(x['uo'], axes = TRUE)
 ```
 
 ![](README_files/figure-gfm/first_plot-1.png)<!-- -->
-
-## Archiving data
-
-You can download and archive data using the database functionality
-provided in this package. There are a number of ways to manage suites of
-data, this is just one fairly light weight method.
-
-Here, we store data in a directory tree that starts with `product` and
-`region` at it’s root. Within the `region` we divide by `year`,
-`monthday`. Within in each `monthday` directory there are one or more
-files uniquely named to provide complete identification of datasetid,
-time, depth, period, variable and treatment. Each file contains one
-raster for one variable at one depth and one time.
-
-Here is an example of a file name that follows this pattern
-`datasetid__date_time_depth_period_variable_treatment.tif`.
-
-    GLOBAL_ANALYSISFORECAST_PHY_001_024/nwa/2022/0601/cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2022-06-01T000000_sur_day_uo_raw.tif
-
-Here you can see that data set id and the rest of the identifiers are
-separated by a double underscore to aid in programmatic parsing. Time
-includes the hour in case we ever want to download the 6-hour data sets.
-Depth is currenly only expressed as “sur”, “bot” and “mld”, but use of
-measured values such as “1.493” *etc.* is allowed but not currently
-used. The treatment, `raw`, in this case means the values are as
-downloaded, however, if you ever wanted to roll your own running mean
-(say 8-day rolling mean) or some other statistic this naming system
-provides the flexibility you will need.
-
-**NOTE** Don’t forget to [set your root data
-path](#Configure-data-path).
-
-First we define an output path for the Gulf of Maine data. The path
-isn’t created until data is written to it. Then we simply call fetch and
-write individual GeoTIFF files into a database structure. Note that we
-provide an identifier that provides the provenance of the data. We
-receive, in turn, a table that serves as a database.
-
-``` r
-x = stars::read_stars(ofile) |>
-  dplyr::slice("depth", 1)
-```
-
-    ## uo, vo,
-
-``` r
-dates = stars::st_get_dimension_values(x, "time")
-db = lapply(names(x),
-  function(nm){
-    db = sprintf("%s__%s_%s_%s_%s_%s%s",
-                 dataset_id,
-                 format(dates, "%Y-%m-%dT000000"),
-                 "sur", 
-                 "day",
-                 nm,
-                 "raw",
-                 ".tif") |>
-      decompose_filename()
-    for(i in seq_along(dates)) write_copernicus(dplyr::slice(x[nm], "time", i), 
-                                                dplyr::slice(db, i),
-                                                path)
-    db
-  }) |>
-  dplyr::bind_rows()
-```
-
-Since this is the first time you have downloaded and archived data, be
-sure to save the database.
-
-``` r
-write_database(db, path)
-```
-
-### Using the database
-
-The database is very light and easy to filter for just the records you
-might need. Note that depth is a character data type; this provides you
-with flexibility to define depth as ‘surface’ or ‘50-75’ or something
-like that.
-
-Let’s walk through reading the database, filtering it for a subset,
-reading the files and finally displaying.
-
-``` r
-db <- copernicus::read_database(path) |>
-  dplyr::glimpse()
-```
-
-    ## Rows: 20
-    ## Columns: 7
-    ## $ id        <chr> "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m", "cmems_mod_glo_…
-    ## $ date      <date> 2025-03-28, 2025-03-29, 2025-03-30, 2025-03-31, 2025-04-01,…
-    ## $ time      <chr> "000000", "000000", "000000", "000000", "000000", "000000", …
-    ## $ depth     <chr> "sur", "sur", "sur", "sur", "sur", "sur", "sur", "sur", "sur…
-    ## $ period    <chr> "day", "day", "day", "day", "day", "day", "day", "day", "day…
-    ## $ variable  <chr> "uo", "uo", "uo", "uo", "uo", "uo", "uo", "uo", "uo", "uo", …
-    ## $ treatment <chr> "raw", "raw", "raw", "raw", "raw", "raw", "raw", "raw", "raw…
-
-Now we can read in the files.
-
-``` r
-s = read_copernicus(db, path)
-s
-```
-
-    ## stars object with 3 dimensions and 2 attributes
-    ## attribute(s):
-    ##           Min.     1st Qu.        Median        Mean    3rd Qu.     Max.  NA's
-    ## uo  -1.2678599 -0.06923880 -0.0005947499 0.001666143 0.06905091 1.270773 26800
-    ## vo  -0.4879295 -0.05941393 -0.0092028086 0.016247062 0.04970369 1.277342 26800
-    ## dimension(s):
-    ##      from  to         offset    delta  refsys x/y
-    ## x       1 109         -72.04  0.08333      NA [x]
-    ## y       1  85          46.04 -0.08333      NA [y]
-    ## time    1  10 2025-03-28 UTC   1 days POSIXct
-
-The database diretcory structure looks like this (requires [fs
-package](https://CRAN.R-project.org/package=fs)) which you won’t need
-just to use copernicus).
-
-``` r
-fs::dir_tree(path)
-```
-
-    ## /mnt/s1/projects/ecocast/coredata/copernicus/GLOBAL_ANALYSISFORECAST_PHY_001_024/gom
-    ## ├── 2025
-    ## │   ├── 0328
-    ## │   │   ├── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-03-28T000000_sur_day_uo_raw.tif
-    ## │   │   └── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-03-28T000000_sur_day_vo_raw.tif
-    ## │   ├── 0329
-    ## │   │   ├── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-03-29T000000_sur_day_uo_raw.tif
-    ## │   │   └── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-03-29T000000_sur_day_vo_raw.tif
-    ## │   ├── 0330
-    ## │   │   ├── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-03-30T000000_sur_day_uo_raw.tif
-    ## │   │   └── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-03-30T000000_sur_day_vo_raw.tif
-    ## │   ├── 0331
-    ## │   │   ├── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-03-31T000000_sur_day_uo_raw.tif
-    ## │   │   └── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-03-31T000000_sur_day_vo_raw.tif
-    ## │   ├── 0401
-    ## │   │   ├── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-04-01T000000_sur_day_uo_raw.tif
-    ## │   │   └── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-04-01T000000_sur_day_vo_raw.tif
-    ## │   ├── 0402
-    ## │   │   ├── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-04-02T000000_sur_day_uo_raw.tif
-    ## │   │   └── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-04-02T000000_sur_day_vo_raw.tif
-    ## │   ├── 0403
-    ## │   │   ├── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-04-03T000000_sur_day_uo_raw.tif
-    ## │   │   └── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-04-03T000000_sur_day_vo_raw.tif
-    ## │   ├── 0404
-    ## │   │   ├── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-04-04T000000_sur_day_uo_raw.tif
-    ## │   │   └── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-04-04T000000_sur_day_vo_raw.tif
-    ## │   ├── 0405
-    ## │   │   ├── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-04-05T000000_sur_day_uo_raw.tif
-    ## │   │   └── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-04-05T000000_sur_day_vo_raw.tif
-    ## │   └── 0406
-    ## │       ├── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-04-06T000000_sur_day_uo_raw.tif
-    ## │       └── cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m__2025-04-06T000000_sur_day_vo_raw.tif
-    ## └── database

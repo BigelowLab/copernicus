@@ -5,14 +5,21 @@
 \title{Read the json product catalog}
 \usage{
 read_product_catalog(
-  filename = copernicus_path("catalogs/all_products.json"),
-  tabulate = TRUE
+  product_id = "all_products",
+  path = copernicus_path("catalogs"),
+  tabulate = TRUE,
+  flatten = TRUE
 )
 }
 \arguments{
-\item{filename}{chr the path to the file}
+\item{product_id}{chr, the prodict id to laod (or "all_products" if you have that)}
 
-\item{tabulate}{logical, if TRUE transform to a table}
+\item{path}{chr the path to the file}
+
+\item{tabulate}{logical, if TRUE transform to a nested table}
+
+\item{flatten}{logical, if TRUE and `tabulate` is TRUE then transofrm to a 
+flat table}
 }
 \value{
 a named list of json element

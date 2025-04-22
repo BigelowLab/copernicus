@@ -67,6 +67,7 @@ read_dataset_description = function(dataset_id = "cmems_mod_glo_phy_myint_0.083d
 #' 
 #' @export
 #' @param x a `variables` node
+#' @param dataset_id chr, the dataset_id to attach to the output
 #' @return table or possibly filled with NAs if x is NULL
 flatten_variables = function(x, dataset_id = "unknown"){
   if(is.null(x)) {
@@ -78,7 +79,9 @@ flatten_variables = function(x, dataset_id = "unknown"){
       units = NA_character_,
       start_time = now,
       end_time = now,
-      time_step = NA_real_
+      time_step = NA_real_,
+      min_depth = NA_real_,
+      max_depth = NA_real_
    ) 
    return(r)
   }
@@ -109,13 +112,32 @@ flatten_variables = function(x, dataset_id = "unknown"){
   step = time[,3, drop = TRUE]/1000
   time = as.POSIXct(time[,1:2, drop = FALSE]/1000, origin = origin, tz = "UTC")
   
+  depth = lapply(x, function(subx){
+    y = subx[['coordinates']]
+    names(y) <- sapply(y, `[[`, "coordinate_id")
+    y = y[['depth']]
+    depth = if (is.null(y)){
+      c(NA_real_, NA_real_)
+    } else {
+      range(y[['values']])
+    }
+  })
+  depth = if (length(depth) == 1){
+      matrix(depth[[1]], ncol = 2) 
+    } else {
+      do.call(rbind, depth)
+    }
+  
+  
   dplyr::tibble(dataset_id = dataset_id[1],
                 short_name = sapply(x, "[[", "short_name"),
                 standard_name = sapply(x, "[[", "standard_name"),
                 units = sapply(x, "[[", "units"),
                 start_time = time[,1],
                 end_time = time[,2],
-                time_step = step)
+                time_step = step,
+                min_depth = depth[,1],
+                max_depth = depth[,2])
 }
 
 
@@ -290,6 +312,8 @@ fetch_product_description = function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_0
 #' @param path chr the copernicus data path
 #' @param fetch logical, if TRUE and the data was not previously downloaded, then
 #'   try to fetch the data
+#' @param x list of NULL, if NULL then we read the losting form file, if a 
+#'   list we assume this is the product listing.
 #' @return list, nested table or flat table
 read_product_description = function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
                                     tabulate = TRUE,
@@ -312,7 +336,7 @@ read_product_description = function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_00
     names(x) <- sapply(x, "[[", "dataset_id")
     x = lapply(names(x),
                 function(nm){
-                  cat("dataset_id", nm, "\n")
+                  #cat("dataset_id", nm, "\n")
                   y = x[[nm]][['versions']][[1]][["parts"]][[1]][['services']]
                   names(y) <- sapply(y, "[[", "service_name")
                   r = flatten_variables(y[[service_name]][["variables"]],
@@ -366,19 +390,50 @@ tabulate_product_catalog = function(x = read_product_catalog()){
 #' Read the json product catalog
 #' 
 #' @export
-#' @param filename chr the path to the file
-#' @param tabulate logical, if TRUE transform to a table
+#' @param product_id chr, the prodict id to laod (or "all_products" if you have that)
+#' @param path chr the path to the file
+#' @param tabulate logical, if TRUE transform to a nested table
+#' @param flatten logical, if TRUE and `tabulate` is TRUE then transofrm to a 
+#'   flat table 
 #' @return a named list of json element
-read_product_catalog = function(filename = copernicus_path("catalogs/all_products.json"),
-                                tabulate = TRUE){
+read_product_catalog = function(product_id = "all_products",
+                                path = copernicus_path("catalogs"),
+                                tabulate = TRUE,
+                                flatten = TRUE){
+  filename = file.path(path[1], sprintf("%s.json", product_id[1]))
   x = jsonlite::read_json(filename)[['products']]
   names(x) <- sapply(x,
                      function(n){
                        n$product_id
                      })
-  if (tabulate) x = tabulate_product_catalog(x)
+  if (tabulate) {
+    x = tabulate_product_catalog(x)
+    if (flatten) x = tidyr::unnest(x, dplyr::all_of("vars"))
+  }
   return(x)
 }
+
+
+#' Fetch the product catalog
+#' 
+#' @export
+#' @param product_id chr, the product to describe or "all_products" to fetch all
+#' @param app chr, the `copernicusmarine` app
+#' @param ofile chr, the name of the file to save with the response content
+#' @return 0 for success non-zero otherwise
+fetch_product_catalog = function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
+                                 app = get_copernicus_app(),
+                                 ofile = copernicus_path("catalogs",
+                                                         sprintf("%s.json", product_id[1]))){
+  cmd = if (grepl("all", tolower(product_id[1]), fixed = TRUE)){
+    sprintf("describe --disable-progress-bar --log-level ERROR > %s", ofile)
+    } else {
+      sprintf("describe --disable-progress-bar --log-level ERROR --product-id %s > %s",
+               product_id[1], ofile)
+    }
+  system2(app, cmd)
+}
+
 
 
 #' Browse a product by id

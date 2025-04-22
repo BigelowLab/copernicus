@@ -8,6 +8,8 @@ flatten_variables(x, dataset_id = "unknown")
 }
 \arguments{
 \item{x}{a `variables` node}
+
+\item{dataset_id}{chr, the dataset_id to attach to the output}
 }
 \value{
 table or possibly filled with NAs if x is NULL

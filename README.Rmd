@@ -99,13 +99,13 @@ copernicus::get_copernicus_app()
 You can download a product catalog for local storage.
 
 ```
-ok = copernicus::fetch_product_catalog()
+ok = copernicus::fetch_product_catalog(product_id = "GLOBAL_ANALYSISFORECAST_BGC_001_028")
 ```
 
 This downloads into a "catalogs" directory within your data directory Now read it in.
 
 ```{r read_catalog}
-x = copernicus::read_product_catalog()
+x = copernicus::read_product_catalog(product_id = "GLOBAL_ANALYSISFORECAST_BGC_001_028")
 x
 ```
 

@@ -146,37 +146,3 @@ generate_filename = function(x,
     }) |>
   unlist()
 }
-
-
-#' Archive a stars object to a database
-#' 
-#' @export
-#' @param x stars object
-#' @param path char, the data path
-#' @param ... arguments for \code{\link{generate_filename}}
-#' @return tabular database as a tibble
-archive_copernicus = function(x,
-                              path = ".",
-                              ...){
-  
-  ff = generate_filename(x, ...)
-  db = decompose_filename(ff)
-  ff = compose_filename(db, path)
-  # for each time, variable, depth order in filename
-  d = dim(x)
-  i = 1
-  n = length(x)
-  for (idepth in seq_len(d[['depth']])){
-    for (itime in seq_len(d[['time']])){
-      for (v in (seq_len(n))){
-        if (!dir.exists(dirname(ff[i+v]))) dir.create(dirname(ff[i+v]),
-                                                      recursive = TRUE)
-        stars::write_stars(x[v,,,idepth,itime, drop = TRUE], ff[i+v-1])
-      }
-      i = i + n # advance the count
-    } # iyear
-  } # idepth
-  
-  db
-  
-}

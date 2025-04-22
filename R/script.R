@@ -150,7 +150,7 @@ fetch_copernicus_script <- function(script = "cmems_mod_glo_phy",
     warning("unable to download copernicus data to", out_path[1])
     return(NULL)
   }
-  ss <- unpack_copernicus(out_path[1])
+  ss <- stars::read_stars(out_path[1])
   if (cleanup){
     ok <- file.remove(out_path)
     if (!ok) warning("unable to remove file:", out_path[1])

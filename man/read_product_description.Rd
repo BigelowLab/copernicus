@@ -28,6 +28,9 @@ The default is used by the CLI.}
 
 \item{fetch}{logical, if TRUE and the data was not previously downloaded, then
 try to fetch the data}
+
+\item{x}{list of NULL, if NULL then we read the losting form file, if a 
+list we assume this is the product listing.}
 }
 \value{
 list, nested table or flat table

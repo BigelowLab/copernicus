@@ -34,10 +34,7 @@ squote = function(x, fancy = FALSE){
 #' copernicusmarine subset -i cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m -x 5.0 -X 10.0 -y 38.0 -Y 42.0 -z 0. -Z 10. -v uo -v vo -t 2022-01-01 -T 2022-01-15 -o ./copernicus-data -f dataset_subset.nc
 build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
                             product = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
-                            vars = product_lut(product[1]) |>
-                              dplyr::filter(.data$dataset_id == dataset_id) |>
-                              dplyr::pull(dplyr::all_of("short_name")) |>
-                              unlist(),
+                            vars = c("uo", "vo"),
                             bb = c(xmin = 5, ymin = 38, xmax = 10, ymax = 42),
                             depth = c(0, 1),
                             time = c("2022-01-01", "2022-01-15"),
@@ -52,10 +49,8 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
   if (FALSE){
     dataset_id = "cmems_mod_glo_phy_my_0.083deg_P1D-m"
     product = "GLOBAL_MULTIYEAR_PHY_001_030"
-    vars = product_lut(product[1]) |>
-      dplyr::filter(.data$dataset_id == dataset_id) |>
-      dplyr::pull(dplyr::all_of("short_name")) |>
-      unlist()
+    vars = c("bottomT", "mlotst", "siconc", "sithick", "so", "thetao", "uo", 
+             "usi", "vo", "vsi", "zos")
     time = structure(c(8401, 8401), class = "Date")
     ofile = sprintf("%s_%s_%s.nc",
                     product, dataset_id, 
@@ -144,7 +139,7 @@ fetch_copernicus_cli_subset = function(ofile = "output.nc",
     return(NULL)
   }
   # read in as stars
-  x = unpack_copernicus(ofile)
+  x = stars::read_stars(ofile)
   if (cleanup) file.remove(ofile)
   x
 }

@@ -41,7 +41,7 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
                             ofile = sprintf("%s_%s_%s.nc",
                                             product, dataset_id, 
                                             format(as.Date(time[1]), "%Y-%m-%d")),
-                            extra = "--overwrite",
+                            extra = "--overwrite --disable-progress-bar",
                             app = get_copernicus_app(),
                             dry_run = FALSE,
                             log_level = ifelse(dry_run, "DEBUG", "ERROR") ){

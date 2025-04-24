@@ -33,7 +33,17 @@ try to fetch the data}
 list we assume this is the product listing.}
 }
 \value{
-list, nested table or flat table
+list, nested table or flat table.  If a flattened table then it will have these
+
+* dataset_id chr
+* short_name chr
+* standard_name chr
+* units chr
+* start_time dttm
+* end_time dttm
+* time_step num (in seconds)
+* min_depth num
+* max_depth num
 }
 \description{
 Read the description for a product

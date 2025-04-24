@@ -314,8 +314,18 @@ fetch_product_description = function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_0
 #'   try to fetch the data
 #' @param x list of NULL, if NULL then we read the losting form file, if a 
 #'   list we assume this is the product listing.
-#' @return list, nested table or flat table
-read_product_description = function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
+#' @return list, nested table or flat table.  If a flattened table then it will have these
+#'
+#' * dataset_id chr
+#' * short_name chr
+#' * standard_name chr
+#' * units chr
+#' * start_time dttm
+#' * end_time dttm
+#' * time_step num (in seconds)
+#' * min_depth num
+#' * max_depth num
+read_product_description <- function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
                                     tabulate = TRUE,
                                     flatten = TRUE,
                                     service_name = "arco-geo-series",

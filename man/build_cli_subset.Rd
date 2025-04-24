@@ -13,7 +13,7 @@ build_cli_subset(
   time = c("2022-01-01", "2022-01-15"),
   ofile = sprintf("\%s_\%s_\%s.nc", product, dataset_id, format(as.Date(time[1]),
     "\%Y-\%m-\%d")),
-  extra = "--overwrite",
+  extra = "--overwrite --disable-progress-bar",
   app = get_copernicus_app(),
   dry_run = FALSE,
   log_level = ifelse(dry_run, "DEBUG", "ERROR")

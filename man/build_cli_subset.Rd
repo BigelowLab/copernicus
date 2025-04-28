@@ -16,7 +16,7 @@ build_cli_subset(
   extra = "--overwrite --disable-progress-bar",
   app = get_copernicus_app(),
   dry_run = FALSE,
-  log_level = ifelse(dry_run, "DEBUG", "ERROR")
+  log_level = ifelse(dry_run, "DEBUG", "QUIET")
 )
 }
 \arguments{

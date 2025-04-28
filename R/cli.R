@@ -44,7 +44,7 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
                             extra = "--overwrite --disable-progress-bar",
                             app = get_copernicus_app(),
                             dry_run = FALSE,
-                            log_level = ifelse(dry_run, "DEBUG", "ERROR") ){
+                            log_level = ifelse(dry_run, "DEBUG", "QUIET") ){
 
   if (FALSE){
     dataset_id = "cmems_mod_glo_phy_my_0.083deg_P1D-m"
@@ -113,7 +113,8 @@ download_copernicus_cli_subset = function(..., verbose = FALSE){
   }
   x[['args']] = sprintf("%s",x[['args']])
   
-  system2(x[['app']], args = x[['args']])
+  msg = system2(x[['app']], args = x[['args']], stdout = TRUE)
+  0
 }
 
  
@@ -139,7 +140,7 @@ fetch_copernicus_cli_subset = function(ofile = "output.nc",
     return(NULL)
   }
   # read in as stars
-  x = stars::read_stars(ofile)
+  x = stars::read_stars(ofile, quiet = TRUE)
   if (cleanup) file.remove(ofile)
   x
 }

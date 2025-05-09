@@ -44,13 +44,11 @@ The [Copernicus Marine Toolbox](https://help.marine.copernicus.eu/en/collections
   + [sf](https://CRAN.R-project.org/package=sf)
   + [stars](https://CRAN.R-project.org/package=stars)
   + [readr](https://CRAN.R-project.org/package=readr)
-  + [twinkle](https://github.com/BigelowLab/twinkle) (not on CRAN)
   
 
 ## Installation
 
 ```
-remotes::install_github("BigelowLab/twinkle")
 remotes::install_github("BigelowLab/copernicus")
 ```
 

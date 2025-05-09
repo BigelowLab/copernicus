@@ -81,6 +81,7 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
     args = sprintf("%s %s", args, s)
   }
   if (!is.null(time)){
+    if (length(time) == 1) time = c(time, time)
     if (!inherits(time, "character")) {
       time = format(time, "%Y-%m-%dT%H:%M:%S")
     } else {

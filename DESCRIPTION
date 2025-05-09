@@ -15,7 +15,6 @@ Imports:
   ncdf4,
   sf,
   stars,
-  twinkle,
   tidyr
 Suggests:
   fs,

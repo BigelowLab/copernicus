@@ -318,6 +318,21 @@ get_var_array <- function(x, var, index, collapse_degen = FALSE){
                    collapse_degen = collapse_degen)
 }
 
+#' Bind stars objects as attributes
+#' 
+#' @export
+#' @param x list of one or more stars objects
+#' @param ... ignored
+#' @return stars object
+bind_attrs = function(x, ...) {
+  x = x[!sapply(x, is.null)]
+  if (length(x) == 0) 
+    stop("input has zero length")
+  do.call(c, append(x, list(along = NA_integer_, ...)))
+}
+
+  
+
 
 #' Retrieve a variable as array or stars object.
 #'
@@ -458,7 +473,7 @@ get_var <- function(x,
                 })
     if (length(r) > 1){
       r <- r |>
-        twinkle::bind_attrs() |> #nms= format(times[itime], "%Y%m%dT%H%M%S")) |>
+        bind_attrs() |> #nms= format(times[itime], "%Y%m%dT%H%M%S")) |>
         merge(name = 'time') |>
         stars::st_set_dimensions(which = 4,
                                  names = 'time',

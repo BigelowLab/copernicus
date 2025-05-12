@@ -19,7 +19,6 @@ squote = function(x, fancy = FALSE){
 #' 
 #' @export
 #' @param dataset_id char, the data set identifier such as 'cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m'
-#' @param product chr the product family such as "global-analysis-forecast-phy-001-024"
 #' @param vars char, a vector of one or more variables such as c("uo", "vo")
 #' @param bb [sf](bbox) or named numeric vector, either a [sf](bbox) or 
 #'    a 4 element named vector with "xmin", "xmax", "ymin" and "ymax" named elements
@@ -33,14 +32,11 @@ squote = function(x, fancy = FALSE){
 #' @return named 2 element character vector of the app and the args
 #' copernicusmarine subset -i cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m -x 5.0 -X 10.0 -y 38.0 -Y 42.0 -z 0. -Z 10. -v uo -v vo -t 2022-01-01 -T 2022-01-15 -o ./copernicus-data -f dataset_subset.nc
 build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1D-m",
-                            product = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
                             vars = c("uo", "vo"),
                             bb = c(xmin = 5, ymin = 38, xmax = 10, ymax = 42),
                             depth = c(0, 1),
                             time = c("2022-01-01", "2022-01-15"),
-                            ofile = sprintf("%s_%s_%s.nc",
-                                            product, dataset_id, 
-                                            format(as.Date(time[1]), "%Y-%m-%d")),
+                            ofile = copernicus_path("temp", paste0(dataset_id[1], ".nc")),
                             extra = "--overwrite --disable-progress-bar",
                             app = get_copernicus_app(),
                             dry_run = FALSE,
@@ -48,13 +44,10 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
 
   if (FALSE){
     dataset_id = "cmems_mod_glo_phy_my_0.083deg_P1D-m"
-    product = "GLOBAL_MULTIYEAR_PHY_001_030"
     vars = c("bottomT", "mlotst", "siconc", "sithick", "so", "thetao", "uo", 
              "usi", "vo", "vsi", "zos")
     time = structure(c(8401, 8401), class = "Date")
-    ofile = sprintf("%s_%s_%s.nc",
-                    product, dataset_id, 
-                    format(time[1], "%Y-%m-%d"))
+    ofile = copernicus_path("temp", paste0(dataset_id[1], ".nc"))
     extra = "--overwrite"
     app = get_copernicus_app()
     log_level = "ERROR"
@@ -106,7 +99,7 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
 #' @param ... arguments for \code{\link{build_cli_subset}}
 #' @param verbose logical, if true pint the calling sequence excluding credentials
 #' @return numeric, 0 for success
-download_copernicus_cli_subset = function(..., verbose = FALSE){
+download_copernicus_cli_subset = function(verbose = FALSE, ...){
   x = build_cli_subset(...)
   if (verbose){
     s = sprintf("%s %s", x[['app']], args = x[['args']])
@@ -115,7 +108,7 @@ download_copernicus_cli_subset = function(..., verbose = FALSE){
   x[['args']] = sprintf("%s",x[['args']])
   
   msg = system2(x[['app']], args = x[['args']], stdout = TRUE)
-  0
+  msg
 }
 
  
@@ -126,17 +119,16 @@ download_copernicus_cli_subset = function(..., verbose = FALSE){
 #' file is deleted.
 #'
 #' @export
-#' @param ofile chr, the temporary (?) outfile
 #' @inheritDotParams download_copernicus_cli_subset
 #' @param cleanup logical, if TRUE clean up files
 #' @return named list of stars objects (organized by variable) or NULL
-fetch_copernicus_cli_subset = function(ofile = "output.nc", 
-                                cleanup = TRUE,
-                                ...){
+fetch_copernicus_cli_subset = function(ofile = copernicus_path("temp", paste0(dataset_id[1], ".nc")),
+                                       cleanup = TRUE,
+                                       ...){
   
   ok = try(download_copernicus_cli_subset(ofile = ofile, ...))
   if (inherits(ok, "try-error")) return(NULL)
-  if (ok != 0){
+  if (is.numeric(ok) && ok[1] != 0){
     message("download failed for ", basename(ofile))
     return(NULL)
   }

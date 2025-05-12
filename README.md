@@ -1,9 +1,9 @@
 copernicus
 ================
 
-Provides access, download and archiving tools for
-[Copernicus](https://marine.copernicus.eu/) marine datasets using R
-language. This package has been developed primarily around …
+Provides access to, and download from, [Copernicus Marine Data
+Store](https://marine.copernicus.eu/) using R language. This package has
+been developed primarily around …
 
 - [GLOBAL_MULTIYEAR_PHY_001_030](https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_PHY_001_030/description)
   31 Dec 1992 to a month or more lag
@@ -66,11 +66,9 @@ supports `subset`.
 - [sf](https://CRAN.R-project.org/package=sf)
 - [stars](https://CRAN.R-project.org/package=stars)
 - [readr](https://CRAN.R-project.org/package=readr)
-- [twinkle](https://github.com/BigelowLab/twinkle) (not on CRAN)
 
 ## Installation
 
-    remotes::install_github("BigelowLab/twinkle")
     remotes::install_github("BigelowLab/copernicus")
 
 ## Configuration
@@ -244,9 +242,9 @@ x
 
     ## stars object with 4 dimensions and 2 attributes
     ## attribute(s):
-    ##                Min.     1st Qu.       Median         Mean    3rd Qu.     Max.
-    ## uo [m/s] -0.8798773 -0.07763755 -0.002414509 -0.007870006 0.05840731 1.534169
-    ## vo [m/s] -0.8442903 -0.05558647 -0.002378657  0.028312241 0.05098823 1.805341
+    ##                Min.     1st Qu.      Median        Mean    3rd Qu.     Max.
+    ## uo [m/s] -0.9230007 -0.08498658 -0.01408345  0.01123039 0.04875003 1.479645
+    ## vo [m/s] -1.8433951 -0.06975559 -0.01406787 -0.02037171 0.03712043 1.345416
     ##           NA's
     ## uo [m/s] 26800
     ## vo [m/s] 26800
@@ -255,7 +253,7 @@ x
     ## x        1 109         -72.04  0.08333      NA [x]
     ## y        1  85          46.04 -0.08333      NA [y]
     ## depth    1   1      0.494 [m]       NA      NA    
-    ## time     1  10 2025-04-22 UTC   1 days POSIXct
+    ## time     1  10 2025-05-12 UTC   1 days POSIXct
 
 ``` r
 plot(x['uo'], axes = TRUE)

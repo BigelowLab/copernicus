@@ -7,7 +7,7 @@ output: github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
-Provides access, download and archiving tools for [Copernicus](https://marine.copernicus.eu/) marine datasets using R language. This package has been developed primarily around ...
+Provides access to, and download from, [Copernicus Marine Data Store](https://marine.copernicus.eu/) using R language. This package has been developed primarily around ...
 
 + [GLOBAL_MULTIYEAR_PHY_001_030](https://data.marine.copernicus.eu/product/GLOBAL_MULTIYEAR_PHY_001_030/description) 31 Dec 1992 to a month or more lag
 

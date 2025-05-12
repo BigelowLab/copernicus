@@ -4,11 +4,13 @@
 \alias{fetch_copernicus_cli_subset}
 \title{Fetch Copernicus data as a list of \code{stars} objects}
 \usage{
-fetch_copernicus_cli_subset(ofile = "output.nc", cleanup = TRUE, ...)
+fetch_copernicus_cli_subset(
+  ofile = copernicus_path("temp", paste0(dataset_id[1], ".nc")),
+  cleanup = TRUE,
+  ...
+)
 }
 \arguments{
-\item{ofile}{chr, the temporary (?) outfile}
-
 \item{cleanup}{logical, if TRUE clean up files}
 
 \item{...}{

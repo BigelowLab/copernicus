@@ -1,10 +1,10 @@
 Package: copernicus
 Type: Package
-Title: Serves Center for Ocean Forecasting Copernicus needs
+Title: Access Copernicus Marine Data Store from R
 Version: 0.3.0
 Author: Ben Tupper
 Maintainer: Ben Tupper <btupper@bigelow.org>
-Description: Provides download, archiving and access to Copernicus related local datasets.
+Description: Provides R-language tools to query and download from Copernicus Marine Data Store.
 License: MIT + file LICENSE
 Encoding: UTF-8
 LazyData: true
@@ -17,6 +17,5 @@ Imports:
   stars,
   tidyr
 Suggests:
-  fs,
   httr
 RoxygenNote: 7.3.2

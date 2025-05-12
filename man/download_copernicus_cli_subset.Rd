@@ -4,12 +4,12 @@
 \alias{download_copernicus_cli_subset}
 \title{Fetch via copernicusmarine subset}
 \usage{
-download_copernicus_cli_subset(..., verbose = FALSE)
+download_copernicus_cli_subset(verbose = FALSE, ...)
 }
 \arguments{
-\item{...}{arguments for \code{\link{build_cli_subset}}}
-
 \item{verbose}{logical, if true pint the calling sequence excluding credentials}
+
+\item{...}{arguments for \code{\link{build_cli_subset}}}
 }
 \value{
 numeric, 0 for success

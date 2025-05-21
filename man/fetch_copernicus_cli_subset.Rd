@@ -20,10 +20,11 @@ fetch_copernicus_cli_subset(
   }}
 }
 \value{
-named list of stars objects (organized by variable) or NULL
+stars object or NULL
 }
 \description{
 This is a wrapper around \code{\link{download_copernicus_cli_subset}} that
-hides the details and returns a list of \code{stars} objects.  The downloaded
-file is deleted.
+hides the details and returns a \code{stars} object. Be aware that what gets
+returned may have one or more degenerate dimensions (single element dimensions)
+such as a single depth, time or both; it depends upon the request that you make.
 }

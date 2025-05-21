@@ -4,7 +4,7 @@
 \name{copernicus-package}
 \alias{copernicus-package}
 \alias{copernicus}
-\title{copernicus: Serves Center for Ocean Forecasting Copernicus needs}
+\title{copernicus: Access Copernicus Marine Data Store from R}
 \description{
 Tools for working with Copernicus data.
 }

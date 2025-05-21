@@ -69,7 +69,7 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
     args = sprintf("%s %s", args, s)
   }
   # if depth is NULL or both elements are NA then skip
-  if (!is.null(depth) & (!all(is.na(depth[1])))){
+  if (!is.null(depth) && (!all(is.na(depth)))){
     s = sprintf("-z %0.2f -Z %0.2f", as.numeric(depth[1]), as.numeric(depth[2]))
     args = sprintf("%s %s", args, s)
   }
@@ -115,13 +115,14 @@ download_copernicus_cli_subset = function(verbose = FALSE, ...){
 #' Fetch Copernicus data as a list of \code{stars} objects
 #'
 #' This is a wrapper around \code{\link{download_copernicus_cli_subset}} that
-#' hides the details and returns a list of \code{stars} objects.  The downloaded
-#' file is deleted.
+#' hides the details and returns a \code{stars} object. Be aware that what gets
+#' returned may have one or more degenerate dimensions (single element dimensions)
+#' such as a single depth, time or both; it depends upon the request that you make.
 #'
 #' @export
 #' @inheritDotParams download_copernicus_cli_subset
 #' @param cleanup logical, if TRUE clean up files
-#' @return named list of stars objects (organized by variable) or NULL
+#' @return stars object or NULL
 fetch_copernicus_cli_subset = function(ofile = copernicus_path("temp", paste0(dataset_id[1], ".nc")),
                                        cleanup = TRUE,
                                        ...){

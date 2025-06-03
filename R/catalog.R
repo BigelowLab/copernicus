@@ -3,14 +3,17 @@
 #' @export
 #' @param dataset_id chr, the dataset to describe
 #' @param app chr, the `copernicusmarine` app
-#' @param ofile chr, the name of the file to save with thr response content
+#' @param ofile chr, the name of the file to save with the response content
+#' @param verbose, logical, if TRUE output messages
 #' @return 0 for success non-zero otherwise
 fetch_dataset_description = function(dataset_id = "cmems_mod_glo_phy_myint_0.083deg_P1D-m",
                                      app = get_copernicus_app(),
                                      ofile = copernicus_path("catalogs",
-                                                             sprintf("%s.json", dataset_id[1]))){
+                                                             sprintf("%s.json", dataset_id[1])),
+                                     verbose = interactive()){
   cmd = sprintf("describe --disable-progress-bar --log-level ERROR --dataset-id %s > %s",
                 dataset_id[1], ofile)
+  if(verbose) cat("fetch_dataset_description: ", app, cmd, "\n")
   system2(app, cmd)
 }
 

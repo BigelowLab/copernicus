@@ -422,14 +422,14 @@ read_product_catalog = function(product_id = "all_products_copernicus_marine_ser
     filename = file.path(path[1], "all_products_copernicus_marine_service.csv")
     x = readr::read_csv(filename,
                         col_types = c(
-                          product_id = col_character(),
-                          title = col_character(),
-                          dataset_id = col_character(),
-                          dataset_name = col_character(),
-                          short_name = col_character(),
-                          standard_name = col_character(),
-                          units = col_character(),
-                          .default = col_character()))
+                          product_id = readr::col_character(),
+                          title = readr::col_character(),
+                          dataset_id = readr::col_character(),
+                          dataset_name = readr::col_character(),
+                          short_name = readr::col_character(),
+                          standard_name = readr::col_character(),
+                          units = readr::col_character(),
+                          .default = readr::col_character()))
   } else {
     x = import_product_catalog(product_id = "all_products_copernicus_marine_service",
                                path = copernicus_path("catalogs"),

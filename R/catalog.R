@@ -400,19 +400,62 @@ tabulate_product_catalog = function(x = read_product_catalog()){
     dplyr::bind_rows()
 }
 
-#' Read the json product catalog
+#' Read the json product catalog (possibly pre-formatted as CSV instead of JSON)
 #' 
 #' @export
-#' @param product_id chr, the prodict id to laod (or "all_products" if you have that)
+#' @param product_id chr, the product id to laod (or "all_products" if you have that)
 #' @param path chr the path to the file
 #' @param tabulate logical, if TRUE transform to a nested table
-#' @param flatten logical, if TRUE and `tabulate` is TRUE then transofrm to a 
+#' @param flatten logical, if TRUE and `tabulate` is TRUE then transform to a 
 #'   flat table 
+#' @param import logical, if TRUE then read the CSV version (pre-flattened). In this case the
+#'   output will be filtered for the product_id(s) provided unless the anyone of the 
+#'   product_id() contains the word "all"
 #' @return a named list of json element
-read_product_catalog = function(product_id = "all_products",
+read_product_catalog = function(product_id = "all_products_copernicus_marine_service",
+                                path = copernicus_path("catalogs"),
+                                tabulate = TRUE,
+                                flatten = TRUE,
+                                import = FALSE){
+  
+  if (!import){
+    filename = file.path(path[1], "all_products_copernicus_marine_service.csv")
+    x = readr::read_csv(filename,
+                        col_types = c(
+                          product_id = col_character(),
+                          title = col_character(),
+                          dataset_id = col_character(),
+                          dataset_name = col_character(),
+                          short_name = col_character(),
+                          standard_name = col_character(),
+                          units = col_character(),
+                          .default = col_character()))
+  } else {
+    x = import_product_catalog(product_id = "all_products_copernicus_marine_service",
+                               path = copernicus_path("catalogs"),
+                               tabulate = TRUE,
+                               flatten = TRUE)
+  }
+  
+  if (!any(grepl("all", product_id))) x = dplyr::filter(x, .data$product_id %in% product_id)
+  
+  return(x)
+}
+
+#' Import the json product catalog
+#' 
+#' @export
+#' @param name chr, the name of the catalog name
+#' @param path chr the path to the file
+#' @param tabulate logical, if TRUE transform to a nested table
+#' @param flatten logical, if TRUE and `tabulate` is TRUE then transform to a 
+#'   flat table 
+#' @return a named list of json element, nested list or a table
+import_product_catalog = function(name = "all_products_copernicus_marine_service",
                                 path = copernicus_path("catalogs"),
                                 tabulate = TRUE,
                                 flatten = TRUE){
+  
   filename = file.path(path[1], sprintf("%s.json", product_id[1]))
   x = jsonlite::read_json(filename)[['products']]
   names(x) <- sapply(x,
@@ -423,10 +466,9 @@ read_product_catalog = function(product_id = "all_products",
     x = tabulate_product_catalog(x)
     if (flatten) x = tidyr::unnest(x, dplyr::all_of("vars"))
   }
+
   return(x)
 }
-
-
 #' Fetch the product catalog
 #' 
 #' @export

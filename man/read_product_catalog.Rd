@@ -2,28 +2,33 @@
 % Please edit documentation in R/catalog.R
 \name{read_product_catalog}
 \alias{read_product_catalog}
-\title{Read the json product catalog}
+\title{Read the json product catalog (possibly pre-formatted as CSV instead of JSON)}
 \usage{
 read_product_catalog(
-  product_id = "all_products",
+  product_id = "all_products_copernicus_marine_service",
   path = copernicus_path("catalogs"),
   tabulate = TRUE,
-  flatten = TRUE
+  flatten = TRUE,
+  import = FALSE
 )
 }
 \arguments{
-\item{product_id}{chr, the prodict id to laod (or "all_products" if you have that)}
+\item{product_id}{chr, the product id to laod (or "all_products" if you have that)}
 
 \item{path}{chr the path to the file}
 
 \item{tabulate}{logical, if TRUE transform to a nested table}
 
-\item{flatten}{logical, if TRUE and `tabulate` is TRUE then transofrm to a 
+\item{flatten}{logical, if TRUE and `tabulate` is TRUE then transform to a 
 flat table}
+
+\item{import}{logical, if TRUE then read the CSV version (pre-flattened). In this case the
+output will be filtered for the product_id(s) provided unless the anyone of the 
+product_id() contains the word "all"}
 }
 \value{
 a named list of json element
 }
 \description{
-Read the json product catalog
+Read the json product catalog (possibly pre-formatted as CSV instead of JSON)
 }

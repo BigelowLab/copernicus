@@ -1,6 +1,6 @@
 # usage: export_catalog [--] [--help] catalog_file export_file
 # 
-# Export Copernicus JSON catalog to CSV
+# Export Copernicus JSON catalog to CSV (well, RDS)
 # 
 # positional arguments:
 #   catalog_file  the catalog filename
@@ -16,7 +16,7 @@ suppressPackageStartupMessages({
 })
 
 
-ARGS = arg_parser("Export Copernicus JSON catalog to CSV",
+ARGS = arg_parser("Export Copernicus JSON catalog to CSV (RDS)",
                   name = "export_catalog",
                   hide.opts = TRUE) |>
   add_argument("catalog_file", 
@@ -26,9 +26,9 @@ ARGS = arg_parser("Export Copernicus JSON catalog to CSV",
 
 inpath = dirname(ARGS$catalog_file)
 iname = gsub(".json", "", basename(ARGS$catalog_file), fixed = TRUE)
-ofile = paste0(iname, ".csv")
+ofile = paste0(iname, ".rds")
 
 
 
 x = copernicus::read_product_catalog(iname, path = inpath, import = TRUE) |>
-  readr::write_csv( file.path(inpath, ofile))
+  readr::write_rds(file = file.path(inpath, ofile))

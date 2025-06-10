@@ -66,6 +66,22 @@ read_dataset_description = function(dataset_id = "cmems_mod_glo_phy_myint_0.083d
   x
 }
 
+#' Given a variables node, get a standard_name, short_name or units
+#' @export
+#' @param x a variables node with multiple parts
+#' @param name chr, the desired element name
+#' @return character, possibly NA
+get_parts_value = function(x, name = "standard_name"){
+  standard_name = sapply(x, function(x) {
+    if (name %in% names(x)) {
+      paste(x[[name]], collapse = " ")
+    } else {
+      NA_character_
+    }
+  })
+}
+
+
 #' Flatten a dataset `variables` element
 #' 
 #' @export
@@ -88,22 +104,33 @@ flatten_variables = function(x, dataset_id = "unknown"){
    ) 
    return(r)
   }
-  short_name = sapply(x, "[[", "short_name")
-  standard_name = sapply(x, "[[", "standard_name")
-  units = sapply(x, "[[", "units")
+  short_name = get_parts_value(x, "sort_name") #sapply(x, "[[", "short_name")
+  standard_name = get_parts_value(x, "standard_name") 
+  #standard_name = sapply(x, function(x) {
+  #  if ("standard_name" %in% names(x)) {
+  #    paste(x[["standard_name"]], collapse = " ")
+  #  } else {
+  #    NA_character_
+  #  }
+  #})
+  units = get_parts_value(x, "units") #sapply(x, "[[", "units")
   origin = as.POSIXct("1970-01-01 00:00:00Z", tz = "UTC")
   time = lapply(x, function(subx){
     y = subx[['coordinates']]
     names(y) <- sapply(y, `[[`, "coordinate_id")
-    y = y[['time']]
-    if ("minimum_value" %in% names(y)){
-      r = c(y[["minimum_value"]], y[['maximum_value']], y[['step']]) |>
-        as.numeric()
+    if ("time" %in% names(y)){
+      y = y[['time']]
+      if ("minimum_value" %in% names(y)){
+        r = c(y[["minimum_value"]], y[['maximum_value']], y[['step']]) |>
+          as.numeric()
+      } else {
+        values = sapply(y$values, `[[`, 1) |> as.numeric() 
+        r = range(values)
+        step = (r[2] - r[1])/length(values)
+        r = c(r, step)
+      }
     } else {
-      values = sapply(y$values, `[[`, 1) |> as.numeric() 
-      r = range(values)
-      step = (r[2] - r[1])/length(values)
-      r = c(r, step)
+      r = rep(NA_real_,3)
     }
     r
   })
@@ -133,9 +160,9 @@ flatten_variables = function(x, dataset_id = "unknown"){
   
   
   dplyr::tibble(dataset_id = dataset_id[1],
-                short_name = sapply(x, "[[", "short_name"),
-                standard_name = sapply(x, "[[", "standard_name"),
-                units = sapply(x, "[[", "units"),
+                short_name = short_name, # get_parts_value(x, "short_name"),
+                standard_name = standard_name, # get_parts_value(x, "standard_name"),
+                units = units, # get_parts_value(x, "units"),
                 start_time = time[,1],
                 end_time = time[,2],
                 time_step = step,
@@ -206,20 +233,32 @@ unpack_dataset = function(x = get_dataset_node()){
   
   vars = x$versions[[1]]$parts[[1]]$services[[1]]$variables 
   if (length(vars) > 0){
-    v = lapply(vars,
-      function(v){
-        nms = names(v)
-        short_name = if("short_name" %in% nms) v$short_name else ""
-        standard_name = if("standard_name" %in% nms) v$standard_name else ""
-        units = if("units" %in% nms) v$units else ""
-        dplyr::tibble(
-          short_name,
-          standard_name,
-          units)
-      }) |>
-      dplyr::bind_rows()
+    v = flatten_variables(vars, dataset_id = x$dataset_id)
+    #v = lapply(vars,
+    #  function(v){
+    #    nms = names(v)
+    #    short_name = if("short_name" %in% nms) v$short_name else ""
+    #    standard_name = if("standard_name" %in% nms) v$standard_name else ""
+    #    units = if("units" %in% nms) v$units else ""
+    #    dplyr::tibble(
+    #      short_name,
+    #      standard_name,
+    #      units)
+    #  }) |>
+    #  dplyr::bind_rows()
   } else {
-    v = NULL
+    never = Sys.time() + NA
+    v = dplyr::tibble(
+      dataset_id = x$dataset_id[1],
+      short_name = NA_character_,
+      standard_name = NA_character_,
+      units = NA_character_,
+      start_time = never,
+      end_time = never,
+      time_step = NA_real_,
+      min_depth = NA_real_,
+      max_depth = NA_real_
+    ) 
   } # vars missing?
   r = dplyr::tibble(dataset_id = x$dataset_id,
                     dataset_name = x$dataset_name,
@@ -419,19 +458,20 @@ read_product_catalog = function(product_id = "all_products_copernicus_marine_ser
                                 import = FALSE){
   
   if (!import){
-    filename = file.path(path[1], "all_products_copernicus_marine_service.csv")
-    x = readr::read_csv(filename,
-                        col_types = c(
-                          product_id = readr::col_character(),
-                          title = readr::col_character(),
-                          dataset_id = readr::col_character(),
-                          dataset_name = readr::col_character(),
-                          short_name = readr::col_character(),
-                          standard_name = readr::col_character(),
-                          units = readr::col_character(),
-                          .default = readr::col_character()))
+    filename = file.path(path[1], "all_products_copernicus_marine_service.rds")
+    x = readr::read_rds(filename)
+    #x = readr::read_csv(filename,
+    #                    col_types = c(
+    #                      product_id = readr::col_character(),
+    #                      title = readr::col_character(),
+    #                      dataset_id = readr::col_character(),
+    #                      dataset_name = readr::col_character(),
+    #                      short_name = readr::col_character(),
+    #                      standard_name = readr::col_character(),
+    #                      units = readr::col_character(),
+    #                      .default = readr::col_character()))
   } else {
-    x = import_product_catalog(product_id = "all_products_copernicus_marine_service",
+    x = import_product_catalog(name = "all_products_copernicus_marine_service",
                                path = copernicus_path("catalogs"),
                                tabulate = TRUE,
                                flatten = TRUE)
@@ -456,7 +496,7 @@ import_product_catalog = function(name = "all_products_copernicus_marine_service
                                 tabulate = TRUE,
                                 flatten = TRUE){
   
-  filename = file.path(path[1], sprintf("%s.json", product_id[1]))
+  filename = file.path(path[1], sprintf("%s.json", name[1]))
   x = jsonlite::read_json(filename)[['products']]
   names(x) <- sapply(x,
                      function(n){
@@ -464,11 +504,15 @@ import_product_catalog = function(name = "all_products_copernicus_marine_service
                      })
   if (tabulate) {
     x = tabulate_product_catalog(x)
-    if (flatten) x = tidyr::unnest(x, dplyr::all_of("vars"))
+    if (flatten) {
+      x = dplyr::select(x, -dplyr::all_of("dataset_id")) |>
+        tidyr::unnest( dplyr::all_of("vars"))
+    }
   }
 
   return(x)
 }
+
 #' Fetch the product catalog
 #' 
 #' @export
@@ -489,7 +533,10 @@ fetch_product_catalog = function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_0
   system2(app, cmd)
 }
 
-
+#' Read a tabular catalog
+#' 
+#' @export
+#' @param name 
 
 #' Browse a product by id
 #' 
@@ -503,3 +550,27 @@ browse_product = function(product = "GLOBAL_ANALYSISFORECAST_BGC_001_028"){
   tmp = gsub("PRODUCT_ID", product[1], tmp, fixed = TRUE)
   httr::BROWSE(tmp)
 }
+
+
+# Notes from 2025-06-09
+#
+# Master catalog is comprised of 303 product elements
+# 
+# Each product element is a list of 9 or 10 elements
+# including title, product_id, description, and 1 or more dataset elements
+# 
+# Each dataset element is a node of 3 elements
+# 
+# dataset_id, dataset_name and versions elements
+# 
+# Version elements have a label and a parts element
+# 
+# Parts elements have name,  services elements and release date
+# 
+# service elements have service_name, servcie_short_name, service_format, uri and variables elements
+# 
+# variable elements have short_name, standard_name, units, bbox and coordinates
+# 
+# coordinates have 1 or more coordinate elements (for depth, latitude, longtitude and time)
+# 
+# a coordinate element has coordinate_if ("time"), coordinate units, minimum_value, maximum value, setp and chucking length

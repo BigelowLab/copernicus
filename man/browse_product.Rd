@@ -2,16 +2,18 @@
 % Please edit documentation in R/catalog.R
 \name{browse_product}
 \alias{browse_product}
-\title{Browse a product by id}
+\title{Read a tabular catalog}
 \usage{
 browse_product(product = "GLOBAL_ANALYSISFORECAST_BGC_001_028")
 }
 \arguments{
 \item{product}{chr, the product id}
+
+\item{name}{Browse a product by id}
 }
 \value{
 hmmm, whatever [httr](BROWSE) returns
 }
 \description{
-Browse a product by id
+Read a tabular catalog
 }

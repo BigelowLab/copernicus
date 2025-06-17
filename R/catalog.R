@@ -104,7 +104,7 @@ flatten_variables = function(x, dataset_id = "unknown"){
    ) 
    return(r)
   }
-  short_name = get_parts_value(x, "sort_name") #sapply(x, "[[", "short_name")
+  short_name = get_parts_value(x, "short_name") #sapply(x, "[[", "short_name")
   standard_name = get_parts_value(x, "standard_name") 
   #standard_name = sapply(x, function(x) {
   #  if ("standard_name" %in% names(x)) {
@@ -230,8 +230,9 @@ fetch_dataset_catalog = function(filename = copernicus_path("catalogs/all_produc
 unpack_dataset = function(x = get_dataset_node()){
   
   stopifnot(c("dataset_id", "dataset_name", "versions") %in% names(x))
-  
-  vars = x$versions[[1]]$parts[[1]]$services[[1]]$variables 
+  services = x$versions[[1]]$parts[[1]]$services
+  names(services) = sapply(services, '[[', 'service_name')
+  vars = services[["arco-geo-series"]]$variables 
   if (length(vars) > 0){
     v = flatten_variables(vars, dataset_id = x$dataset_id)
     #v = lapply(vars,

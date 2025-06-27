@@ -16,9 +16,10 @@ time_as_string = function(x){
 #' 
 #' @export
 #' @param x list of stars objects
+#' @param tolerance num, see [stars::c.stars]
 #' @return a single multi-attribute stars object
-bind_stars = function(x){
-  do.call(c, append(x, list(along = NA_integer_)))
+bind_stars = function(x, tolerance = 1e-6){
+  do.call(c, append(x, list(along = NA_integer_), tolerance = tolerance))
 }
 #' Guess the time interval
 #' 

@@ -4,10 +4,12 @@
 \alias{bind_stars}
 \title{Bind a list of stars objects into a multi-attribute stars object}
 \usage{
-bind_stars(x)
+bind_stars(x, tolerance = 1e-06)
 }
 \arguments{
 \item{x}{list of stars objects}
+
+\item{tolerance}{num, see [stars::c.stars]}
 }
 \value{
 a single multi-attribute stars object

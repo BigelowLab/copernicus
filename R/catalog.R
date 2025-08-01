@@ -520,17 +520,23 @@ import_product_catalog = function(name = "all_products_copernicus_marine_service
 #' @param product_id chr, the product to describe or "all_products" to fetch all
 #' @param app chr, the `copernicusmarine` app
 #' @param ofile chr, the name of the file to save with the response content
+#' @param verbose logical, if TRUE echo the command string
 #' @return 0 for success non-zero otherwise
 fetch_product_catalog = function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
                                  app = get_copernicus_app(),
                                  ofile = copernicus_path("catalogs",
-                                                         sprintf("%s.json", product_id[1]))){
+                                                         sprintf("%s.json", product_id[1])),
+                                 verbose = FALSE){
+  
+  ok = make_path(dirname(ofile))
+  
   cmd = if (grepl("all", tolower(product_id[1]), fixed = TRUE)){
     sprintf("describe --disable-progress-bar --log-level ERROR > %s", ofile)
     } else {
       sprintf("describe --disable-progress-bar --log-level ERROR --product-id %s > %s",
                product_id[1], ofile)
     }
+  if (verbose) cat(app, cmd, "\n")
   system2(app, shQuote(cmd))
 }
 

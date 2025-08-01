@@ -531,7 +531,7 @@ fetch_product_catalog = function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_0
       sprintf("describe --disable-progress-bar --log-level ERROR --product-id %s > %s",
                product_id[1], ofile)
     }
-  system2(app, cmd)
+  system2(app, shQuote(cmd))
 }
 
 #' Read a tabular catalog

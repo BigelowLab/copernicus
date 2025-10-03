@@ -64,8 +64,14 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
   if (dry_run) args = paste(args, "--dry-run")
   
   if (!is.null(bb)){
-    if (!inherits(bb, 'numeric')) bb = as.numeric(bb)
-    s = sprintf("-x %0.2f -X %0.2f -y %0.2f -Y %0.2f", bb[['xmin']], bb[['xmax']], bb[["ymin"]], bb[['ymax']])
+    #if (!inherits(bb, 'numeric')) bb = as.vector(bb)
+    if (inherits(bb, c("sf", "sfc"))) {
+      bb = sf::st_bbox(bb) 
+    } else {
+      stopifnot(all(c("xmin", "ymin", "xmax", "ymax") %in% names(bb)))
+    }
+    s = sprintf("-x %0.2f -X %0.2f -y %0.2f -Y %0.2f", 
+                bb[['xmin']], bb[['xmax']], bb[['ymin']], bb[['ymax']])
     args = sprintf("%s %s", args, s)
   }
   # if depth is NULL or both elements are NA then skip

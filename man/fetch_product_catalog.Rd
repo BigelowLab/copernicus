@@ -7,7 +7,8 @@
 fetch_product_catalog(
   product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
   app = get_copernicus_app(),
-  ofile = copernicus_path("catalogs", sprintf("\%s.json", product_id[1]))
+  ofile = copernicus_path("catalogs", sprintf("\%s.json", product_id[1])),
+  verbose = FALSE
 )
 }
 \arguments{
@@ -16,6 +17,8 @@ fetch_product_catalog(
 \item{app}{chr, the `copernicusmarine` app}
 
 \item{ofile}{chr, the name of the file to save with the response content}
+
+\item{verbose}{logical, if TRUE echo the command string}
 }
 \value{
 0 for success non-zero otherwise

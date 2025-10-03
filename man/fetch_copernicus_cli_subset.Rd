@@ -17,6 +17,8 @@ fetch_copernicus_cli_subset(
   Arguments passed on to \code{\link[=download_copernicus_cli_subset]{download_copernicus_cli_subset}}
   \describe{
     \item{\code{verbose}}{logical, if true pint the calling sequence excluding credentials}
+    \item{\code{stdout}}{logical or chr, if TRUE then return a charcater vector with output,
+otherwise return numeric code.}
   }}
 }
 \value{

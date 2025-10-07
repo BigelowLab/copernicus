@@ -8,7 +8,7 @@ fetch_dataset_description(
   dataset_id = "cmems_mod_glo_phy_myint_0.083deg_P1D-m",
   app = get_copernicus_app(),
   ofile = copernicus_path("catalogs", sprintf("\%s.json", dataset_id[1])),
-  verbose = interactive()
+  ...
 )
 }
 \arguments{
@@ -18,7 +18,7 @@ fetch_dataset_description(
 
 \item{ofile}{chr, the name of the file to save with the response content}
 
-\item{verbose, }{logical, if TRUE output messages}
+\item{...}{other arguments for `system_command()`}
 }
 \value{
 0 for success non-zero otherwise

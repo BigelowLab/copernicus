@@ -4,17 +4,18 @@
 #' @param dataset_id chr, the dataset to describe
 #' @param app chr, the `copernicusmarine` app
 #' @param ofile chr, the name of the file to save with the response content
-#' @param verbose, logical, if TRUE output messages
+#' @param ... other arguments for `system_command()`
 #' @return 0 for success non-zero otherwise
 fetch_dataset_description = function(dataset_id = "cmems_mod_glo_phy_myint_0.083deg_P1D-m",
                                      app = get_copernicus_app(),
                                      ofile = copernicus_path("catalogs",
                                                              sprintf("%s.json", dataset_id[1])),
-                                     verbose = interactive()){
+                                     ...){
   cmd = sprintf("describe --disable-progress-bar --log-level ERROR --dataset-id %s > %s",
                 dataset_id[1], ofile)
-  if(verbose) cat("fetch_dataset_description: ", app, cmd, "\n")
-  system2(app, cmd)
+  #if(verbose) cat("fetch_dataset_description: ", app, cmd, "\n")
+  #system2(app, cmd)
+  system_command(cmd, app, ...)
 }
 
 
@@ -210,13 +211,16 @@ read_dataset_service = function(x, flatten = TRUE){
 #' @export
 #' @param filename chr the name of the file to download
 #' @param app chr the name of the app to run
+#' @param ... other arguments for `system_command()`
 #' @return catalog list
 fetch_dataset_catalog = function(filename = copernicus_path("catalogs/all_products_and_datasets.json"),
-                         app = get_copernicus_app()){
+                         app = get_copernicus_app(),
+                         ...){
   cmd = sprintf("describe --return-fields datasets > %s", filename)
   path = dirname(filename)
   if (!dir.exists(path)) ok = dir.create(path, recursive = TRUE)
-  ok = system2(app, cmd)
+  #ok = system2(app, cmd)
+  ok = system_command(cmd, app, ...)
   cat("dataset catalog downloaded: ", ok == 0, "\n")
   read_dataset_catalog(filename)
 }
@@ -334,14 +338,17 @@ read_dataset_catalog = function(filename = copernicus_path("catalogs/all_product
 #' @param product_id chr, the product to describe
 #' @param app chr, the `copernicusmarine` app
 #' @param ofile chr, the name of the file to save with the response content
+#' @param ... other arguments for `system_command()`
 #' @return 0 for success non-zero otherwise
 fetch_product_description = function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_024",
                                      app = get_copernicus_app(),
                                      ofile = copernicus_path("catalogs",
-                                                             sprintf("%s.json", product_id[1]))){
+                                                             sprintf("%s.json", product_id[1])),
+                                     ...){
   cmd = sprintf("describe --disable-progress-bar --log-level ERROR --product-id %s > %s",
                 product_id[1], ofile)
-  system2(app, cmd)
+  #system2(app, cmd)
+  system_command(cmd, app, ...)
 }
 
 #' Read the description for a product
@@ -536,8 +543,9 @@ fetch_product_catalog = function(product_id = "GLOBAL_ANALYSISFORECAST_PHY_001_0
       sprintf("describe --disable-progress-bar --log-level ERROR --product-id %s > %s",
                product_id[1], ofile)
     }
-  if (verbose) cat(app, cmd, "\n")
-  system2(app, shQuote(cmd))
+  #if (verbose) cat(app, cmd, "\n")
+  #system2(app, shQuote(cmd))
+  system_command(cmd, app, verbose = verbose)
 }
 
 #' Read a tabular catalog

@@ -107,15 +107,6 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
 #' @return numeric, 0 for success
 download_copernicus_cli_subset = function(verbose = FALSE, ...){
   x = build_cli_subset(...)
-  #if (verbose){
-  #  s = sprintf("%s %s", x[['app']], args = x[['args']])
-  #  cat(s, "\n")
-  #}
-  # this is the strangest line of code ever
-  #x[['args']] = sprintf("%s",x[['args']])
-  
-  #msg = system2(x[['app']], args = x[['args']], stdout = stdout)
-  #msg
   system_command(x[['args']], x[['app']], verbose = verbose)
 }
 

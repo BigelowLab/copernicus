@@ -4,13 +4,23 @@
 \alias{fetch_copernicus}
 \title{Retrieve a stars array of Copernicus data}
 \usage{
-fetch_copernicus(use = c("cli", "script")[1], bind = TRUE, ...)
+fetch_copernicus(
+  use = c("cli", "script")[1],
+  bind = TRUE,
+  form = c("stars", "filename", "list")[1],
+  ...
+)
 }
 \arguments{
 \item{use}{char, download method one of 'cli' or 'script' (deprecated)}
 
 \item{bind}{logical, if TRUE bind the elements of the returned into a single 
-multi-attribute stars object.}
+multi-attribute stars object. Ignored if `form` is not "stars"}
+
+\item{form}{str, one of "stars" or "filename" to return a stars object or the filename
+If "filename" then no attempt is made to read the downloaded file and `cleanup` is ignored.
+If "list" then read the file into a list of stars objects where variables are grouped
+by dimensional dependence.}
 
 \item{...}{
   Arguments passed on to \code{\link[=download_copernicus_cli_subset]{download_copernicus_cli_subset}}

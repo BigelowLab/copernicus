@@ -6,13 +6,16 @@
 \usage{
 fetch_dataset_catalog(
   filename = copernicus_path("catalogs/all_products_and_datasets.json"),
-  app = get_copernicus_app()
+  app = get_copernicus_app(),
+  ...
 )
 }
 \arguments{
 \item{filename}{chr the name of the file to download}
 
 \item{app}{chr the name of the app to run}
+
+\item{...}{other arguments for `system_command()`}
 }
 \value{
 catalog list

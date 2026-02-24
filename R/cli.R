@@ -104,19 +104,19 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
 #' @export
 #' @param ... arguments for \code{\link{build_cli_subset}}
 #' @param verbose logical, if true pint the calling sequence excluding credentials
-#' @param stdout logical or chr, if TRUE then return a charcater vector with output,
-#'   otherwise return numeric code.
 #' @return numeric, 0 for success
-download_copernicus_cli_subset = function(verbose = FALSE, stdout = "", ...){
+download_copernicus_cli_subset = function(verbose = FALSE, ...){
   x = build_cli_subset(...)
-  if (verbose){
-    s = sprintf("%s %s", x[['app']], args = x[['args']])
-    cat(s, "\n")
-  }
-  x[['args']] = sprintf("%s",x[['args']])
+  #if (verbose){
+  #  s = sprintf("%s %s", x[['app']], args = x[['args']])
+  #  cat(s, "\n")
+  #}
+  # this is the strangest line of code ever
+  #x[['args']] = sprintf("%s",x[['args']])
   
-  msg = system2(x[['app']], args = x[['args']], stdout = stdout)
-  msg
+  #msg = system2(x[['app']], args = x[['args']], stdout = stdout)
+  #msg
+  system_command(x[['args']], x[['app']], verbose = verbose)
 }
 
  

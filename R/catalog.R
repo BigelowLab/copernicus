@@ -299,12 +299,17 @@ tabulate_datasets = function(x = read_dataset_catalog()){
 #' 
 #' @export
 #' @param x one or more dataset_id values
-#' @return chr vector of "day", "month", NA (unknown) etc
+#' @return chr vector of "day", "month", NA (unknown), "static", "month-clim", etc
 dataset_period = function(x = c("cmems_mod_glo_phy_anfc_0.083deg_P1D-m",
-                                "cmems_mod_glo_phy_anfc_0.083deg_P1M-m")){
+                                "cmems_mod_glo_phy_anfc_0.083deg_P1M-m",
+                                "cmems_mod_glo_phy_my_0.083deg-climatology_P1M-m",
+                                "cmems_mod_glo_phy_my_0.083deg_static")){
   r = rep(NA_character_, length(x))
   r[grepl("P1D", x, fixed = TRUE)] <- "day"
   r[grepl("P1M", x, fixed = TRUE)] <- "month"
+  r[grepl("static", x, fixed = TRUE)] <- "static"
+  ix = grepl("climatology", x, fixed = TRUE)
+  r[ix] = paste(r[ix], "clim", sep = "-")
   r
 }
 

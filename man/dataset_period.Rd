@@ -5,14 +5,16 @@
 \title{Guess at the period of dataset given its id}
 \usage{
 dataset_period(
-  x = c("cmems_mod_glo_phy_anfc_0.083deg_P1D-m", "cmems_mod_glo_phy_anfc_0.083deg_P1M-m")
+  x = c("cmems_mod_glo_phy_anfc_0.083deg_P1D-m", "cmems_mod_glo_phy_anfc_0.083deg_P1M-m",
+    "cmems_mod_glo_phy_my_0.083deg-climatology_P1M-m",
+    "cmems_mod_glo_phy_my_0.083deg_static")
 )
 }
 \arguments{
 \item{x}{one or more dataset_id values}
 }
 \value{
-chr vector of "day", "month", NA (unknown) etc
+chr vector of "day", "month", NA (unknown), "static", "month-clim", etc
 }
 \description{
 Guess at the period of dataset given its id

@@ -130,9 +130,17 @@ download_copernicus_cli_subset = function(verbose = FALSE, ...){
 #' @export
 #' @inheritDotParams download_copernicus_cli_subset
 #' @param cleanup logical, if TRUE clean up files
+#' @param form str, one of "stars" or "filename" to return a stars object or the filename
+#'   If "filename" then no attempt is made to read the downloaded file and `cleanup` is ignored.
+#'   If "list" then read the file into a list of stars objects where variables are grouped
+#'   by dimensional dependence.
+#' @param group logical, if `form` is "list" and if TRUE read variables grouped by dimensional dependence
+#'   if FALSE then each variable is read separately
 #' @return stars object or NULL
 fetch_copernicus_cli_subset = function(ofile = copernicus_path("temp", paste0(dataset_id[1], ".nc")),
                                        cleanup = TRUE,
+                                       form = c("stars", "filename", "list")[1],
+                                       group = TRUE,
                                        ...){
   
   ok = try(download_copernicus_cli_subset(ofile = ofile, ...))
@@ -141,8 +149,15 @@ fetch_copernicus_cli_subset = function(ofile = copernicus_path("temp", paste0(da
     message("download failed for ", basename(ofile))
     return(NULL)
   }
-  # read in as stars
-  x = stars::read_stars(ofile, quiet = TRUE)
-  if (cleanup) file.remove(ofile)
+  if (tolower(form[1]) == "stars"){
+    # read in as stars
+    x = stars::read_stars(ofile, quiet = TRUE)
+    if (cleanup) ok = file.remove(ofile)
+  } else if (tolower(form[1]) == "list"){
+    x = read_stars_list(ofile, group = group)
+    if (cleanup) ok = file.remove(ofile)
+  } else {
+    x = ofile
+  }
   x
 }

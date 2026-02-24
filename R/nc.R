@@ -1,3 +1,22 @@
+#' Retrieve a table of variable dimensional dependencies
+#'
+#' @export
+#' @param filename str, the ncdf file to tabulate
+#' @return date frame of variables and dimensional dependencies
+list_vardims = function(filename){
+  nc = ncdf4::nc_open(filename)
+  vnames = get_varnames(nc)
+  v = lapply(vnames,
+             function(vname){
+               dnames = get_vardims(nc, vname)
+               dplyr::tibble(name = vname,
+                             ndim = length(dnames),
+                             dims = paste(dnames, collapse = " "))
+             }) |>
+    dplyr::bind_rows() 
+  ncdf4::nc_close(nc)
+  return(v)
+}
 
 
 #' Retrieve dimension values by name

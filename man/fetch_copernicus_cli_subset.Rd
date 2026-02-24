@@ -7,11 +7,21 @@
 fetch_copernicus_cli_subset(
   ofile = copernicus_path("temp", paste0(dataset_id[1], ".nc")),
   cleanup = TRUE,
+  form = c("stars", "filename", "list")[1],
+  group = TRUE,
   ...
 )
 }
 \arguments{
 \item{cleanup}{logical, if TRUE clean up files}
+
+\item{form}{str, one of "stars" or "filename" to return a stars object or the filename
+If "filename" then no attempt is made to read the downloaded file and `cleanup` is ignored.
+If "list" then read the file into a list of stars objects where variables are grouped
+by dimensional dependence.}
+
+\item{group}{logical, if `form` is "list" and if TRUE read variables grouped by dimensional dependence
+if FALSE then each variable is read separately}
 
 \item{...}{
   Arguments passed on to \code{\link[=download_copernicus_cli_subset]{download_copernicus_cli_subset}}

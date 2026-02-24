@@ -16,15 +16,17 @@ read_stars_list = function(filename, group = TRUE){
     r = v |>
       dplyr::group_map(
         function(grp, key){
-           stars::read_stars(filename, sub = grp$name)
-        }) |>
+           stars::read_stars(filename, sub = if(nrow(grp) > 1) grp$name else TRUE) |>
+            rlang::set_names(grp$name)
+        }, .keep = TRUE) |>
       rlang::set_names(dplyr::group_keys(v) |> dplyr::pull(1))
   } else {
     r = v |>
       dplyr::rowwise() |>
       dplyr::group_map(
         function(row, key){
-          stars::read_stars(filename, sub = row$name)
+          stars::read_stars(filename, sub = if(nrow(v) > 1) row$name else TRUE) |>
+            rlang::set_names(row$name)
         }
       ) |>
       rlang::set_names(v$name)

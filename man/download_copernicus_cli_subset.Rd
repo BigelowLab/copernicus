@@ -4,10 +4,12 @@
 \alias{download_copernicus_cli_subset}
 \title{Fetch via copernicusmarine subset}
 \usage{
-download_copernicus_cli_subset(verbose = FALSE, ...)
+download_copernicus_cli_subset(verbose = FALSE, tries = 3, ...)
 }
 \arguments{
 \item{verbose}{logical, if true pint the calling sequence excluding credentials}
+
+\item{tries}{numeric, the number of attempts permitted if a fail occurs}
 
 \item{...}{arguments for \code{\link{build_cli_subset}}}
 }

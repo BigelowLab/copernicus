@@ -104,12 +104,22 @@ build_cli_subset = function(dataset_id = "cmems_mod_glo_phy-cur_anfc_0.083deg_P1
 #' @export
 #' @param ... arguments for \code{\link{build_cli_subset}}
 #' @param verbose logical, if true pint the calling sequence excluding credentials
+#' @param tries numeric, the number of attempts permitted if a fail occurs
 #' @return numeric, 0 for success
-download_copernicus_cli_subset = function(verbose = FALSE, ...){
+download_copernicus_cli_subset = function(verbose = FALSE, 
+                                          tries = 3,
+                                          ...){
   x = build_cli_subset(...)
-  system_command(x[['args']], x[['app']], verbose = verbose)
+  n = 1
+  while(n <= tries[1]){
+    ok = system_command(x[['args']], x[['app']], verbose = verbose)
+    if (ok == 0) break
+    warning("download failed")
+    sleep(10)
+    n = n + 1
+  }
+  return(ok)
 }
-
  
 #' Fetch Copernicus data as a list of \code{stars} objects
 #'

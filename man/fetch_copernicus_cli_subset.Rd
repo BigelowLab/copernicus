@@ -27,6 +27,7 @@ if FALSE then each variable is read separately}
   Arguments passed on to \code{\link[=download_copernicus_cli_subset]{download_copernicus_cli_subset}}
   \describe{
     \item{\code{verbose}}{logical, if true pint the calling sequence excluding credentials}
+    \item{\code{tries}}{numeric, the number of attempts permitted if a fail occurs}
   }}
 }
 \value{

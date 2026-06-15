@@ -7,14 +7,18 @@
 dataset_period(
   x = c("cmems_mod_glo_phy_anfc_0.083deg_P1D-m", "cmems_mod_glo_phy_anfc_0.083deg_P1M-m",
     "cmems_mod_glo_phy_my_0.083deg-climatology_P1M-m",
-    "cmems_mod_glo_phy_my_0.083deg_static")
+    "cmems_mod_glo_phy_my_0.083deg_static"),
+  for_sequence = FALSE
 )
 }
 \arguments{
 \item{x}{one or more dataset_id values}
+
+\item{for_sequence}{logical, if TRUE then do not label climatologies to "-clim",
+instead lead "month" as "month"}
 }
 \value{
-chr vector of "day", "month", NA (unknown), "static", "month-clim", etc
+chr vector of "day", "month", NA (unknown), "static", etc
 }
 \description{
 Guess at the period of dataset given its id

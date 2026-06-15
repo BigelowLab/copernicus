@@ -303,18 +303,38 @@ tabulate_datasets = function(x = read_dataset_catalog()){
 #' 
 #' @export
 #' @param x one or more dataset_id values
-#' @return chr vector of "day", "month", NA (unknown), "static", "month-clim", etc
+#' @param for_sequence logical, if TRUE then do not label climatologies to "-clim",
+#'   instead lead "month" as "month"
+#' @return chr vector of "day", "month", NA (unknown), "static", etc
 dataset_period = function(x = c("cmems_mod_glo_phy_anfc_0.083deg_P1D-m",
                                 "cmems_mod_glo_phy_anfc_0.083deg_P1M-m",
                                 "cmems_mod_glo_phy_my_0.083deg-climatology_P1M-m",
-                                "cmems_mod_glo_phy_my_0.083deg_static")){
+                                "cmems_mod_glo_phy_my_0.083deg_static"),
+                          for_sequence = FALSE){
   r = rep(NA_character_, length(x))
   r[grepl("P1D", x, fixed = TRUE)] <- "day"
   r[grepl("P1M", x, fixed = TRUE)] <- "month"
   r[grepl("static", x, fixed = TRUE)] <- "static"
-  ix = grepl("climatology", x, fixed = TRUE)
-  r[ix] = paste(r[ix], "clim", sep = "-")
+  if (for_sequence){
+    # do nothing I think
+  } else {
+    # mark climatologies
+    ix = grepl("climatology", x, fixed = TRUE)
+    r[ix] = paste(r[ix], "clim", sep = "-")
+  }
   r
+}
+
+#' Guess if a dataset is a climatology dataset
+#' 
+#' @export
+#' @param x one or more dataset_id values
+#' @return one logical per element of input `x`, TRUE if climatology
+dataset_is_climatology = function(x = c("cmems_mod_glo_phy_anfc_0.083deg_P1D-m",
+                                        "cmems_mod_glo_phy_anfc_0.083deg_P1M-m",
+                                        "cmems_mod_glo_phy_my_0.083deg-climatology_P1M-m",
+                                        "cmems_mod_glo_phy_my_0.083deg_static")){
+  grepl("climatology", x, fixed = TRUE)
 }
 
 

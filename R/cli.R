@@ -115,7 +115,7 @@ download_copernicus_cli_subset = function(verbose = FALSE,
     ok = system_command(x[['args']], x[['app']], verbose = verbose)
     if (ok == 0) break
     warning("download failed")
-    sleep(10)
+    Sys.sleep(10)
     n = n + 1
   }
   return(ok)
